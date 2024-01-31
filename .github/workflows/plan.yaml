@@ -11,7 +11,7 @@ on:
 
 jobs:
   preview:
-    name: Org
+    name: Plan Terraform Changes in Terramate Stacks
     runs-on: ubuntu-latest
 
     permissions:
@@ -62,14 +62,6 @@ jobs:
         with:
           terraform_version: ${{ steps.tf_version.outputs.tf_version }}
           terraform_wrapper: false
-
-    #   - name: Authenticate to Google Cloud
-    #     if: steps.list.outputs.stdout
-    #     id: auth
-    #     uses: google-github-actions/auth@v1
-    #     with:
-    #       workload_identity_provider: projects/13281225011/locations/global/workloadIdentityPools/github-actions/providers/github-actions
-    #       service_account: ${{ matrix.service_account_id }}@terramate-iac-shr.iam.gserviceaccount.com
 
       - name: Run Terraform fmt
         if: steps.list.outputs.stdout
@@ -153,7 +145,7 @@ jobs:
 
   summary:
     runs-on: ubuntu-latest
-    name: Organization Preview
+    name: Plan Terraform Changes in Terramate Stacks
     needs:
       - preview
 
