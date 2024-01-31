@@ -1,5 +1,11 @@
 name: Preview Changes
 
+env:
+  AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: 975086131449
+  # verbosity setting for Terraform logs
+  # TF_LOG: INFO
+
 on:
   pull_request:
 
@@ -70,6 +76,13 @@ jobs:
         id: fmt
         run: |
           terraform fmt -recursive -check -diff
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/github
+      - run: aws sts get-caller-identity
 
       - name: Run Terraform init on changed stacks
         if: steps.list.outputs.stdout
