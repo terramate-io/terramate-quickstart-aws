@@ -1,0 +1,149 @@
+name: Preview Changes
+
+on:
+  pull_request:
+
+jobs:
+  preview:
+    name: Org
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+
+    strategy:
+      # Let other stacks finish even if one fails.
+      fail-fast: false
+
+    steps:
+      - name: Prepare pull request comment
+        if: github.event.pull_request
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          header: preview
+          message: |
+            ## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}
+
+            :warning: being created... please stand by!
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Install Terramate
+        uses: terramate-io/terramate-action@v1
+
+      - name: Run Terramate fmt
+        run: terramate fmt --check
+
+      - name: List changed stacks
+        id: list
+        run: terramate -C stacks --log-fmt=text list --changed
+
+      - name: Get Terraform version
+        if: steps.list.outputs.stdout
+        id: tf_version
+        run: echo tf_version=$(awk '$1 == "terraform" {print $2}' .tool-versions) >> $GITHUB_OUTPUT
+
+      - name: Install Terraform
+        if: steps.list.outputs.stdout
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ steps.tf_version.outputs.tf_version }}
+          terraform_wrapper: false
+
+    #   - name: Authenticate to Google Cloud
+    #     if: steps.list.outputs.stdout
+    #     id: auth
+    #     uses: google-github-actions/auth@v1
+    #     with:
+    #       workload_identity_provider: projects/13281225011/locations/global/workloadIdentityPools/github-actions/providers/github-actions
+    #       service_account: ${{ matrix.service_account_id }}@terramate-iac-shr.iam.gserviceaccount.com
+
+      - name: Run Terraform fmt
+        if: steps.list.outputs.stdout
+        id: fmt
+        run: |
+          terraform fmt -recursive -check -diff
+
+      - name: Run Terraform init on changed stacks
+        if: steps.list.outputs.stdout
+        id: init
+        run: |
+          terramate -C stacks --log-fmt=console --log-level=info run --changed -- terraform init -lock-timeout=5m
+
+      - name: Run Terraform validate on changed stacks
+        if: steps.list.outputs.stdout
+        id: validate
+        run: |
+          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code -- terraform validate
+
+      - name: Create Terraform plan on changed stacks
+        if: steps.list.outputs.stdout
+        run: |
+          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code -- terraform plan -lock-timeout=5m -out out.tfplan
+
+      - name: Generate Preview Comment
+        if: steps.list.outputs.stdout
+        id: comment
+        run: |
+          echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
+          echo >>pr-comment.txt
+          echo >>pr-comment.txt "### Changed Stacks"
+          echo >>pr-comment.txt
+          echo >>pr-comment.txt '```bash'
+          echo >>pr-comment.txt "${{ steps.list.outputs.stdout }}"
+          echo >>pr-comment.txt '```'
+          echo >>pr-comment.txt
+          echo >>pr-comment.txt "#### Terraform Plan"
+          echo >>pr-comment.txt
+          echo >>pr-comment.txt '```terraform'
+          terramate -C stacks --log-fmt=text run --changed --disable-check-gen-code -- bash -c 'echo -e "\n\nExecuting stack: $(terramate experimental get-config-value terramate.stack.path.absolute)"; terraform show -no-color out.tfplan' 2>&1 | dd bs=1024 count=248 >>pr-comment.txt
+          [ "${PIPESTATUS[0]}" == "141" ] && sed -i 's/#### Terraform Plan/#### :warning: Terraform Plan truncated: please check console output :warning:/' pr-comment.txt
+          echo >>pr-comment.txt '```'
+          cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
+
+      - name: Inform about no Changed Stacks
+        if: success() && !steps.list.outputs.stdout
+        run: |
+          echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
+          echo >>pr-comment.txt
+          echo >>pr-comment.txt "### Changed Stacks in stacks/"
+          echo >>pr-comment.txt
+          echo >>pr-comment.txt 'No changed stacks, no detailed preview will be generated.'
+          cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
+
+      - name: Inform about failure
+        if: failure()
+        run: |
+          echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
+          echo >>pr-comment.txt
+          echo >>pr-comment.txt "### Changed Stacks in stacks/"
+          echo >>pr-comment.txt
+          echo >>pr-comment.txt '```bash'
+          echo >>pr-comment.txt "${{ steps.list.outputs.stdout }}"
+          echo >>pr-comment.txt '```'
+          echo >>pr-comment.txt ':boom: Generating preview failed. Please see details in Actions output.'
+          cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
+
+      - name: Publish Plans for Changed Stacks
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          header: preview
+          path: pr-comment.txt
+
+  summary:
+    runs-on: ubuntu-latest
+    name: Organization Preview
+    needs:
+      - preview
+
+    steps:
+      - name: Check
+        run: "true"
