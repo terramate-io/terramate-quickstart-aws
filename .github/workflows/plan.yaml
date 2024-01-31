@@ -118,7 +118,7 @@ jobs:
         run: |
           echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
           echo >>pr-comment.txt
-          echo >>pr-comment.txt "### Changed Stacks in stacks/"
+          echo >>pr-comment.txt "### Changed Stacks"
           echo >>pr-comment.txt
           echo >>pr-comment.txt 'No changed stacks, no detailed preview will be generated.'
           cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
@@ -128,7 +128,7 @@ jobs:
         run: |
           echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
           echo >>pr-comment.txt
-          echo >>pr-comment.txt "### Changed Stacks in stacks/"
+          echo >>pr-comment.txt "### Changed Stacks"
           echo >>pr-comment.txt
           echo >>pr-comment.txt '```bash'
           echo >>pr-comment.txt "${{ steps.list.outputs.stdout }}"
