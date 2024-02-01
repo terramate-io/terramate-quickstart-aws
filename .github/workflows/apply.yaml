@@ -1,0 +1,99 @@
+name: Deploy All Stacks
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: 975086131449
+  # verbosity setting for Terraform logs
+  # TF_LOG: INFO
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: iac-gcloud-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-org:
+    name: Org
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Let other stacks finish even if one fails.
+      fail-fast: false
+
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Install terramate
+        uses: terramate-io/terramate-action@v1
+
+      - name: List changed stacks
+        id: list
+        run: terramate -C stacks --log-fmt=text list --changed
+
+      - name: Get Terraform version
+        if: steps.list.outputs.stdout
+        id: tf_version
+        run: echo tf_version=$(awk '$1 == "terraform" {print $2}' .tool-versions) >> $GITHUB_OUTPUT
+
+      - name: Install Terraform
+        if: steps.list.outputs.stdout
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ steps.tf_version.outputs.tf_version }}
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/github
+      - run: aws sts get-caller-identity
+
+      - name: Run Terraform init on changed stacks
+        if: steps.list.outputs.stdout
+        id: init
+        run: |
+          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code -- terraform init -lock-timeout=5m
+
+      - name: Create Terraform plan on changed stacks
+        if: steps.list.outputs.stdout
+        id: plan
+        run: |
+          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code -- terraform plan -lock-timeout=5m -out out.tfplan
+
+      - name: Apply planned changes on changed stacks
+        if: steps.list.outputs.stdout
+        id: apply
+        run: |
+          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code --cloud-sync-deployment -- terraform apply -input=false -auto-approve -lock-timeout=5m out.tfplan
+
+      - name: Run drift detection
+        if: steps.list.outputs.stdout
+        id: drift
+        run: |
+          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code --cloud-sync-drift-status --cloud-sync-terraform-plan-file=drift.tfplan -- terraform plan -out drift.tfplan -detailed-exitcode
+
+      - name: Send drift to staging
+        if: steps.list.outputs.stdout
+        id: stg-drift
+        env:
+          TMC_API_HOST: api.terramate.io
+          TM_CLOUD_ORGANIZATION: terramate-demo
+        run: |
+          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code --cloud-sync-drift-status --cloud-sync-terraform-plan-file=drift.tfplan -- terraform plan -out drift.tfplan -detailed-exitcode
