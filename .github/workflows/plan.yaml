@@ -41,27 +41,21 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Install Terramate
-        uses: terramate-io/terramate-action@v1
+      - name: Install Dependencies such as Terramate and Terraform with asdf
+        uses: asdf-vm/actions/install@v3
 
       - name: Run Terramate fmt
         run: terramate fmt --check
 
       - name: List changed stacks
         id: list
-        run: terramate -C stacks --log-fmt=text list --changed
-
-      - name: Get Terraform version
-        if: steps.list.outputs.stdout
-        id: tf_version
-        run: echo tf_version=$(awk '$1 == "terraform" {print $2}' .tool-versions) >> $GITHUB_OUTPUT
-
-      - name: Install Terraform
-        if: steps.list.outputs.stdout
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ steps.tf_version.outputs.tf_version }}
-          terraform_wrapper: false
+        run: |
+          terramate -C stacks list --changed > >(tee /tmp/stdout.txt) 2> >(tee /tmp/stderr.txt)
+          EXIT_CODE=$?
+          echo "stdout<<STDOUT" >>$GITHUB_OUTPUT
+          cat /tmp/stdout.txt >>$GITHUB_OUTPUT
+          echo "STDOUT" >>$GITHUB_OUTPUT
+          exit ${EXIT_CODE}
 
       - name: Run Terraform fmt
         if: steps.list.outputs.stdout
@@ -80,7 +74,7 @@ jobs:
         if: steps.list.outputs.stdout
         id: init
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed -- terraform init -lock-timeout=5m
+          terramate -C stacks --log-fmt=console --log-level=info script run --changed -- terraform init
 
       - name: Run Terraform validate on changed stacks
         if: steps.list.outputs.stdout

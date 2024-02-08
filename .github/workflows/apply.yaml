@@ -39,24 +39,19 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Install terramate
-        uses: terramate-io/terramate-action@v1
+      - name: Install Dependencies such as Terramate and Terraform with asdf
+        uses: asdf-vm/actions/install@v3
 
       - name: List changed stacks
         id: list
-        run: terramate -C stacks --log-fmt=text list --changed
+        run: |
+          terramate -C stacks list --changed > >(tee /tmp/stdout.txt) 2> >(tee /tmp/stderr.txt)
+          EXIT_CODE=$?
+          echo "stdout<<STDOUT" >>$GITHUB_OUTPUT
+          cat /tmp/stdout.txt >>$GITHUB_OUTPUT
+          echo "STDOUT" >>$GITHUB_OUTPUT
+          exit ${EXIT_CODE}
 
-      - name: Get Terraform version
-        if: steps.list.outputs.stdout
-        id: tf_version
-        run: echo tf_version=$(awk '$1 == "terraform" {print $2}' .tool-versions) >> $GITHUB_OUTPUT
-
-      - name: Install Terraform
-        if: steps.list.outputs.stdout
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: ${{ steps.tf_version.outputs.tf_version }}
-          terraform_wrapper: false
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
