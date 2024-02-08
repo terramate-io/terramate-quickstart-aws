@@ -74,7 +74,7 @@ jobs:
         if: steps.list.outputs.stdout
         id: init
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info script run --changed -- terraform init
+          terramate -C stacks --log-fmt=console --log-level=info run --changed -- terraform init -lock-timeout=5m
 
       - name: Run Terraform validate on changed stacks
         if: steps.list.outputs.stdout
