@@ -1,5 +1,5 @@
 generate_hcl "terraform.tf" {
-  # condition = tm_contains(terramate.stack.tags, "terraform")
+  condition = tm_contains(terramate.stack.tags, "terraform")
 
   lets {
     required_providers = { for k, v in tm_try(global.terraform.providers, {}) :
