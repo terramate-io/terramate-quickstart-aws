@@ -12,12 +12,12 @@ on:
       - main
 
 concurrency:
-  group: iac-gcloud-deploy
+  group: terramate-quickstart-aws
   cancel-in-progress: false
 
 jobs:
-  deploy-org:
-    name: Org
+  terraform-apply:
+    name: Apply
     permissions:
       id-token: write
       contents: write
@@ -44,13 +44,7 @@ jobs:
 
       - name: List changed stacks
         id: list
-        run: |
-          terramate -C stacks list --changed > >(tee /tmp/stdout.txt) 2> >(tee /tmp/stderr.txt)
-          EXIT_CODE=$?
-          echo "stdout<<STDOUT" >>$GITHUB_OUTPUT
-          cat /tmp/stdout.txt >>$GITHUB_OUTPUT
-          echo "STDOUT" >>$GITHUB_OUTPUT
-          exit ${EXIT_CODE}
+        run: terramate -C stacks list --changed
 
 
       - name: Configure AWS credentials
@@ -64,31 +58,23 @@ jobs:
         if: steps.list.outputs.stdout
         id: init
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code -- terraform init -lock-timeout=5m
+          terramate -C stacks script run --changed --disable-check-gen-code terraform init
 
       - name: Create Terraform plan on changed stacks
         if: steps.list.outputs.stdout
         id: plan
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code -- terraform plan -lock-timeout=5m -out out.tfplan
+          terramate -C stacks script run --changed --disable-check-gen-code terraform plan
 
       - name: Apply planned changes on changed stacks
         if: steps.list.outputs.stdout
         id: apply
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code --cloud-sync-deployment -- terraform apply -input=false -auto-approve -lock-timeout=5m out.tfplan
+          terramate -C stacks script run --changed --disable-check-gen-code terraform apply
 
-      - name: Run drift detection
-        if: steps.list.outputs.stdout
-        id: drift
-        run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code --cloud-sync-drift-status --cloud-sync-terraform-plan-file=drift.tfplan -- terraform plan -out drift.tfplan -detailed-exitcode
-
-      - name: Send drift to staging
+      - name: Run drift detection and send to Terramate Cloud
         if: steps.list.outputs.stdout
         id: stg-drift
-        env:
-          TMC_API_HOST: api.terramate.io
-          TM_CLOUD_ORGANIZATION: terramate-demo
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code --cloud-sync-drift-status --cloud-sync-terraform-plan-file=drift.tfplan -- terraform plan -out drift.tfplan -detailed-exitcode
+          terramate -C stacks run --changed --disable-check-gen-code --cloud-sync-drift-status --cloud-sync-terraform-plan-file=drift.tfplan -- terraform plan -out drift.tfplan -detailed-exitcode
+

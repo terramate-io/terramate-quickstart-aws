@@ -74,18 +74,18 @@ jobs:
         if: steps.list.outputs.stdout
         id: init
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info script run --changed -- terraform init
+          terramate -C stacks script run --changed terraform init
 
       - name: Run Terraform validate on changed stacks
         if: steps.list.outputs.stdout
         id: validate
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code -- terraform validate
+          terramate -C stacks script run --changed --disable-check-gen-code terraform validate
 
       - name: Create Terraform plan on changed stacks
         if: steps.list.outputs.stdout
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code -- terraform plan -lock-timeout=5m -out out.tfplan
+          terramate -C stacks script run --changed --disable-check-gen-code terraform plan
 
       - name: Generate Preview Comment
         if: steps.list.outputs.stdout
@@ -102,7 +102,7 @@ jobs:
           echo >>pr-comment.txt "#### Terraform Plan"
           echo >>pr-comment.txt
           echo >>pr-comment.txt '```terraform'
-          terramate -C stacks --log-fmt=text run --changed --disable-check-gen-code -- bash -c 'echo -e "\n\nExecuting stack: $(terramate experimental get-config-value terramate.stack.path.absolute)"; terraform show -no-color out.tfplan' 2>&1 | dd bs=1024 count=248 >>pr-comment.txt
+          terramate -C stacks run --changed --disable-check-gen-code -- bash -c 'echo -e "\n\nExecuting stack: $(terramate experimental get-config-value terramate.stack.path.absolute)"; terraform show -no-color out.tfplan' 2>&1 | dd bs=1024 count=248 >>pr-comment.txt
           [ "${PIPESTATUS[0]}" == "141" ] && sed -i 's/#### Terraform Plan/#### :warning: Terraform Plan truncated: please check console output :warning:/' pr-comment.txt
           echo >>pr-comment.txt '```'
           cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
