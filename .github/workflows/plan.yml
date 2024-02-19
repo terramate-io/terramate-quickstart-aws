@@ -2,7 +2,7 @@ name: Preview Changes
 
 env:
   AWS_REGION: us-east-1
-  AWS_ACCOUNT_ID: 975086131449
+  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
   # verbosity setting for Terraform logs
   # TF_LOG: INFO
 
