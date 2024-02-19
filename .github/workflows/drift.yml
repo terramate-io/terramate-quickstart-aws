@@ -1,8 +1,8 @@
-name: Check drift on all stacks every 5 minutes
+name: Check drift on all stacks every 30 minutes
 
 env:
   AWS_REGION: us-east-1
-  AWS_ACCOUNT_ID: 975086131449
+  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
   # verbosity setting for Terraform logs
   # TF_LOG: INFO
   #
@@ -10,7 +10,7 @@ on:
   schedule:
     # * is a special character in YAML so you have to quote this string
     # - cron: '0 2 * * *'
-    - cron: '*/5 * * * *'
+    - cron: '*/30 * * * *'
 
 jobs:
   drift-detection:
