@@ -38,4 +38,4 @@ terraform.tfstate*
 # ignore all tf plan files from CI/CD
 *.tfplan
 pr-comment.txt
-terramate.tm.hcl
+# terramate.tm.hcl
