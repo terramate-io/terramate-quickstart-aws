@@ -1,4 +1,4 @@
-generate_hcl "backend.tf" {
+generate_hcl "_backend.tf" {
   # condition = tm_contains(terramate.stack.tags, "terraform")
 
   content {

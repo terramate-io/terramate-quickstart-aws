@@ -1,4 +1,4 @@
-generate_hcl "terraform.tf" {
+generate_hcl "_terraform.tf" {
   # condition = tm_contains(terramate.stack.tags, "terraform")
 
   lets {
