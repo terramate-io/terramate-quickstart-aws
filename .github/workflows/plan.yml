@@ -74,18 +74,18 @@ jobs:
         if: steps.list.outputs.stdout
         id: init
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed -- terraform init -lock-timeout=5m
+          terramate -C stacks run --changed -- terraform init -lock-timeout=5m
 
       - name: Run Terraform validate on changed stacks
         if: steps.list.outputs.stdout
         id: validate
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code -- terraform validate
+          terramate -C stacks run --changed --disable-check-gen-code -- terraform validate
 
       - name: Create Terraform plan on changed stacks
         if: steps.list.outputs.stdout
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code -- terraform plan -lock-timeout=5m -out out.tfplan
+          terramate -C stacks run --changed --disable-check-gen-code -- terraform plan -lock-timeout=5m -out out.tfplan
 
       - name: Generate Preview Comment
         if: steps.list.outputs.stdout

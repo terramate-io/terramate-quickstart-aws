@@ -1,0 +1,57 @@
+name: Check drift on all stacks every 5 minutes
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: 975086131449
+  # verbosity setting for Terraform logs
+  # TF_LOG: INFO
+  #
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    # - cron: '0 2 * * *'
+    - cron: '*/5 * * * *'
+
+jobs:
+  drift-detection:
+    name: Check Drift
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Let other stacks finish even if one fails.
+      fail-fast: false
+
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Install Dependencies such as Terramate and Terraform with asdf
+        uses: asdf-vm/actions/install@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/github
+      - run: aws sts get-caller-identity
+
+      - name: Run Terraform init on all stacks
+        id: init
+        run: |
+          terramate -C stacks/ run --disable-check-gen-code -- terraform init -lock-timeout=5m
+
+      - name: Run drift detection
+        id: drift
+        run: |
+          terramate -C stacks/ run --disable-check-gen-code --cloud-sync-drift-status --cloud-sync-terraform-plan-file=drift.tfplan -- terraform plan -out drift.tfplan -detailed-exitcode
