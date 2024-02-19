@@ -52,7 +52,6 @@ jobs:
           echo "STDOUT" >>$GITHUB_OUTPUT
           exit ${EXIT_CODE}
 
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -64,31 +63,22 @@ jobs:
         if: steps.list.outputs.stdout
         id: init
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code -- terraform init -lock-timeout=5m
+          terramate -C stacks run --changed --disable-check-gen-code -- terraform init -lock-timeout=5m
 
       - name: Create Terraform plan on changed stacks
         if: steps.list.outputs.stdout
         id: plan
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code -- terraform plan -lock-timeout=5m -out out.tfplan
+          terramate -C stacks run --changed --disable-check-gen-code -- terraform plan -lock-timeout=5m -out out.tfplan
 
       - name: Apply planned changes on changed stacks
         if: steps.list.outputs.stdout
         id: apply
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code --cloud-sync-deployment -- terraform apply -input=false -auto-approve -lock-timeout=5m out.tfplan
+          terramate -C stacks run --changed --disable-check-gen-code --cloud-sync-deployment -- terraform apply -input=false -auto-approve -lock-timeout=5m out.tfplan
 
       - name: Run drift detection
         if: steps.list.outputs.stdout
         id: drift
         run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code --cloud-sync-drift-status --cloud-sync-terraform-plan-file=drift.tfplan -- terraform plan -out drift.tfplan -detailed-exitcode
-
-      - name: Send drift to staging
-        if: steps.list.outputs.stdout
-        id: stg-drift
-        env:
-          TMC_API_HOST: api.terramate.io
-          TM_CLOUD_ORGANIZATION: terramate-demo
-        run: |
-          terramate -C stacks --log-fmt=console --log-level=info run --changed --disable-check-gen-code --cloud-sync-drift-status --cloud-sync-terraform-plan-file=drift.tfplan -- terraform plan -out drift.tfplan -detailed-exitcode
+          terramate -C stacks run --changed --disable-check-gen-code --cloud-sync-drift-status --cloud-sync-terraform-plan-file=drift.tfplan -- terraform plan -out drift.tfplan -detailed-exitcode
