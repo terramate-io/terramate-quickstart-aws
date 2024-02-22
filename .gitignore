@@ -39,3 +39,6 @@ terraform.tfstate*
 *.tfplan
 pr-comment.txt
 # terramate.tm.hcl
+
+# cache directory
+.tf_plugin_cache_dir
