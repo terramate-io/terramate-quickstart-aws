@@ -94,7 +94,9 @@ jobs:
 
       - name: Plan Terraform changes in changed stacks
         if: steps.list.outputs.stdout
-        run: terramate run --changed -- terraform plan -lock-timeout=5m -out out.tfplan
+        run: terramate run --changed --cloud-sync-preview --cloud-sync-terraform-plan-file=out.tfplan -- terraform plan -out out.tfplan -detailed-exitcode -lock=false
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       ### Update Pull Request comment
 
