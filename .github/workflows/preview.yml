@@ -108,7 +108,7 @@ jobs:
         run: |
           echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
           echo >>pr-comment.txt
-          echo >>pr-comment.txt "[View Details on Terramate Cloud]($(cat preview_url.txt))"
+          echo >>pr-comment.txt "[:mag: View Details on Terramate Cloud]($(cat preview_url.txt))"
           echo >>pr-comment.txt
           echo >>pr-comment.txt "### Changed Stacks"
           echo >>pr-comment.txt
@@ -139,7 +139,7 @@ jobs:
         run: |
           echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
           echo >>pr-comment.txt
-          echo >>pr-comment.txt "[View Details on Terramate Cloud]($(cat preview_url.txt))"
+          echo >>pr-comment.txt "[:mag: View Details on Terramate Cloud]($(cat preview_url.txt))"
           echo >>pr-comment.txt
           echo >>pr-comment.txt "### Changed Stacks"
           echo >>pr-comment.txt
