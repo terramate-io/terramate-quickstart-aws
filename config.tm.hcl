@@ -7,6 +7,13 @@ globals "terraform" "backend" {
   region = "us-east-1"
 }
 
+globals "aws" "oidc" {
+  github_repositories = [
+    "terramate-io/terramate-quickstart-aws",
+    # "another-org/another-repo:ref:refs/heads/main",
+  ]
+}
+
 globals "terraform" "providers" "aws" {
   enabled = true
   source  = "hashicorp/aws"
