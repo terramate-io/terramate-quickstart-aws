@@ -86,15 +86,17 @@ jobs:
 
       - name: Initialize Terraform in changed stacks
         if: steps.list.outputs.stdout
-        run: terramate run --changed -- terraform init -lock-timeout=5m
+        run: terramate run --parallel=5 --changed -- terraform init -lock-timeout=5m
 
       - name: Validate Terraform configuration in changed stacks
         if: steps.list.outputs.stdout
-        run: terramate run --changed -- terraform validate
+        run: terramate run --parallel=5  --changed -- terraform validate
 
       - name: Plan Terraform changes in changed stacks
         if: steps.list.outputs.stdout
-        run: terramate run --changed --cloud-sync-preview --cloud-sync-terraform-plan-file=out.tfplan -- terraform plan -out out.tfplan -detailed-exitcode -lock=false
+        run: |
+          echo >preview_url.txt "https://cloud.terramate.io/o/terramate-demo/review-requests"
+          terramate run --parallel=5  --changed --cloud-sync-preview --cloud-sync-terraform-plan-file=out.tfplan -- terraform plan -out out.tfplan -detailed-exitcode -lock=false
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -105,6 +107,8 @@ jobs:
         id: comment
         run: |
           echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
+          echo >>pr-comment.txt
+          echo >>pr-comment.txt "[:mag: View Details on Terramate Cloud]($(cat preview_url.txt))"
           echo >>pr-comment.txt
           echo >>pr-comment.txt "### Changed Stacks"
           echo >>pr-comment.txt
@@ -134,6 +138,8 @@ jobs:
         if: failure()
         run: |
           echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
+          echo >>pr-comment.txt
+          echo >>pr-comment.txt "[:mag: View Details on Terramate Cloud]($(cat preview_url.txt))"
           echo >>pr-comment.txt
           echo >>pr-comment.txt "### Changed Stacks"
           echo >>pr-comment.txt

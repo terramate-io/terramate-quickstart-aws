@@ -42,3 +42,5 @@ pr-comment.txt
 
 # cache directory
 .tf_plugin_cache_dir
+
+preview_url.txt
