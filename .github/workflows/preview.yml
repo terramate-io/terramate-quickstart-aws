@@ -96,7 +96,7 @@ jobs:
         if: steps.list.outputs.stdout
         run: |
           echo >preview_url.txt "https://cloud.terramate.io/o/terramate-demo/review-requests"
-          terramate run --parallel=5  --changed --cloud-sync-preview --cloud-sync-terraform-plan-file=out.tfplan -- terraform plan -out out.tfplan -detailed-exitcode -lock=false
+          terramate run --parallel=5 --changed --cloud-sync-preview --cloud-sync-terraform-plan-file=out.tfplan --debug-preview-url=preview_url.txt -- terraform plan -out out.tfplan -detailed-exitcode -lock=false
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
