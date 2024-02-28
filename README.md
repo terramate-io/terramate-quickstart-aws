@@ -7,7 +7,7 @@
   <p align="center">
     ✨ <a href="https://terramate.io/docs/cli">https://terramate.io</a> ✨
     <br/>
-    Terramate CLI is an open-source Infrastructure as Code (IaC) orchestration tool that <strong>unifies</strong>,
+    Terramate an Infrastructure as Code (IaC) orchestration, collaboration, visibility and observability platform that <strong>unifies</strong>,
     <strong>simplifies</strong>, and <strong>scales</strong> all your infrastructure code, tools, and workflows.
   </p>
 </p>
@@ -23,21 +23,19 @@
 <br>
 <br>
 
-## Terramate AWS QuickStart
+## Introduction 
 
-This repository provides a reference architecture 
+This template repository provides an example Terramate project structure to get started with Terramate and Terraform on AWS.
 
 ### Features
 
-✨ GitOps workflows in GitHub Actions (merge-on-apply) 
-
-✨ Plan Previews in PRs
-
 ✨ Recommended project structure 
 
-✨ Workflows 
+✨ Pre-configured GitHub Action for our GitOps workflow using `merge-and-apply` strategy.
 
-✨ Backend and Provider Code Generation for keeping stacks DRY 
+✨ Preview `terraform plan` changes in Pull Requests
+
+✨ Terraform Backend and Provider Code Generation for keeping stacks DRY 
 
 ✨ Integration with Terramate Cloud
 
