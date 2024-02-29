@@ -23,7 +23,7 @@
 <br>
 <br>
 
-## Introduction 
+## Introduction
 
 This template repository provides a pre-configured Terramate project to get started with Terramate and Terraform on AWS using best practices.
 
