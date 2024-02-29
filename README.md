@@ -25,18 +25,43 @@
 
 ## Introduction 
 
-This template repository provides an example Terramate project structure to get started with Terramate and Terraform on AWS.
+This template repository provides a pre-configured Terramate project to get started with Terramate and Terraform on AWS using best practices.
 
 ### Features
 
-✨ Recommended project structure 
+🚀 **GitOps for Terraform with GitHub Actions**
 
-✨ Pre-configured GitHub Action for our GitOps workflow using `merge-and-apply` strategy.
+Pre-configured GitHub Action for our GitOps workflow using `merge-and-apply` strategy.
 
-✨ Preview `terraform plan` changes in Pull Requests
+🚀 **Recommended Project Structure**
 
-✨ Terraform Backend and Provider Code Generation for keeping stacks DRY 
+Best practice project structure to get up and running in no time.
 
-✨ Integration with Terramate Cloud
+🚀 **OpenID Connect (OIDC)**
 
-✨ Drift Control
+OpenID Connect (OIDC) allows your GitHub Actions workflows to access resources in Amazon Web Services (AWS), without needing to store the AWS credentials as long-lived GitHub secrets.
+
+🚀 **Terraform S3 Remote State Backend**
+
+Terraform Remote State Storage and State Locking with AWS S3 and DynamoDB
+
+🚀 **Change Preview in Pull Requests**
+
+Preview and approval of plans to review and approve changes before deploying.
+
+🚀 **DRY Terraform Stacks**
+
+Keep your stacks DRY by generating common files such as Terraform backend and provider configurations.
+
+🚀 **Terramate Cloud Integration**
+
+🚀 **Drift Management**
+
+🚀 **Slack Notifications**
+
+#### Coming Soon
+
+- Policies with OPA and/or Sentinel
+- Implement checkov, trivy, terrascan
+- Implement infracost
+- Configure pre-commit hook
