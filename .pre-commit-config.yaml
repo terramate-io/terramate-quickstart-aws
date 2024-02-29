@@ -1,0 +1,7 @@
+repos:
+  - repo: https://github.com/mineiros-io/pre-commit-hooks
+    rev: v0.5.0
+    hooks:
+      - id: terramate-fmt
+      - id: terramate-generate
+      - id: terraform-fmt
