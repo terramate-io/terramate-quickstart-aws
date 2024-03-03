@@ -29,35 +29,33 @@ This template repository provides a pre-configured Terramate project to get star
 
 ### Features
 
-🚀 **GitOps for Terraform with GitHub Actions**
+⭐️ **GitOps for Terraform with GitHub Actions**
 
-Pre-configured GitHub Action for our GitOps workflow using `merge-and-apply` strategy.
+Pre-configured GitHub Action GitOps workflows using `merge-and-apply` strategy.
 
-🚀 **Recommended Project Structure**
+⭐️ **Recommended Project Structure**
 
 Best practice project structure to get up and running in no time.
 
-🚀 **OpenID Connect (OIDC)**
+⭐️ **Change Preview in Pull Requests**
+
+Preview and approval of plans in Pull Requests to review and approve changes before deploying.
+
+⭐️ **DRY Terraform Stacks**
+
+Generate Terraform provider and backend configuration in stacks.
+
+⭐️ **OpenID Connect (OIDC)**
 
 OpenID Connect (OIDC) allows your GitHub Actions workflows to access resources in Amazon Web Services (AWS), without needing to store the AWS credentials as long-lived GitHub secrets.
 
-🚀 **Terraform S3 Remote State Backend**
+⭐️ **Terraform S3 Remote State Backend**
 
 Terraform Remote State Storage and State Locking with AWS S3 and DynamoDB
 
-🚀 **Change Preview in Pull Requests**
+⭐️ **Terramate Cloud Integration**
 
-Preview and approval of plans to review and approve changes before deploying.
-
-🚀 **DRY Terraform Stacks**
-
-Keep your stacks DRY by generating common files such as Terraform backend and provider configurations.
-
-🚀 **Terramate Cloud Integration**
-
-🚀 **Drift Management**
-
-🚀 **Slack Notifications**
+Pushes data to Terramate Cloud to enable observability, asset management, drift management and Slack notifications.
 
 #### Coming Soon
 
