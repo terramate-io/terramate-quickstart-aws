@@ -67,15 +67,13 @@ Ensure you have the following prerequisites set up by running the commands below
 1. Install asdf: Follow the [official guide](https://asdf-vm.com/guide/getting-started.html).
 
 2. Install required `asdf` plugins for Terramate and Terraform:
-   
-   `asdf plugin add terramate`
-
-   `asdf plugin add terraform`
-
-   `asdf plugin add pre-commit`
-
-   `asdf install`
-   
+  
+    ```bash
+    asdf plugin add terramate && \
+    asdf plugin add terraform && \
+    asdf plugin add pre-commit && \
+    asdf install
+     ```
 
 3. You need an AWS account (Configure your AWS credentials using one of the supported [authentication mechanisms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication).
 )
