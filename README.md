@@ -62,12 +62,22 @@ Pushes data to Terramate Cloud to enable observability, asset management, drift 
 
 ##### Pre-requisites
 
-- Install asds 
-- Install asdf plugins `asdf add <plugin>`
-- Install asdf dependencies `asdf install`
-- Install pre-commit hooks `pre-commit install`
+Ensure you have the following prerequisites set up by running the commands below:
 
-- You need an AWS account (Configure your AWS credentials using one of the supported [authentication mechanisms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication).
+1. Install asdf: Follow the [official guide](https://asdf-vm.com/guide/getting-started.html).
+
+2. Install required `asdf` plugins for Terramate and Terraform:
+   
+   `asdf plugin add terramate`
+
+   `asdf plugin add terraform`
+
+   `asdf plugin add pre-commit`
+
+   `asdf install`
+   
+
+3. You need an AWS account (Configure your AWS credentials using one of the supported [authentication mechanisms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication).
 )
 
 #### To Do
