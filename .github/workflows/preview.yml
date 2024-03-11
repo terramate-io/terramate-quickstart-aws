@@ -14,6 +14,7 @@ jobs:
       id-token: write
       contents: read
       pull-requests: write
+      checks: read
 
     steps:
 
@@ -86,17 +87,16 @@ jobs:
 
       - name: Initialize Terraform in changed stacks
         if: steps.list.outputs.stdout
-        run: terramate run --parallel=5 --changed -- terraform init -lock-timeout=5m
+        run: terramate run --parallel 1 --changed -- terraform init -lock-timeout=5m
 
       - name: Validate Terraform configuration in changed stacks
         if: steps.list.outputs.stdout
-        run: terramate run --parallel=5  --changed -- terraform validate
+        run: terramate run --parallel 5  --changed -- terraform validate
 
       - name: Plan Terraform changes in changed stacks
         if: steps.list.outputs.stdout
         run: |
-          echo >preview_url.txt "https://cloud.terramate.io/o/terramate-demo/review-requests"
-          terramate run --parallel=5  --changed --cloud-sync-preview --cloud-sync-terraform-plan-file=out.tfplan -- terraform plan -out out.tfplan -detailed-exitcode -lock=false
+          terramate run --parallel 5 --changed --cloud-sync-preview --cloud-sync-terraform-plan-file=out.tfplan --debug-preview-url preview_url.txt --continue-on-error -- terraform plan -out out.tfplan -detailed-exitcode -lock=false
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
