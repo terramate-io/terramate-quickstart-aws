@@ -20,5 +20,6 @@ module "vpc" {
   tags = {
     Terraform   = "true"
     Environment = "dev"
+    Test        = "v0.5.3"
   }
 }
