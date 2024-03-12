@@ -7,8 +7,6 @@
   <p align="center">
     ✨ <a href="https://terramate.io/docs/cli">https://terramate.io</a> ✨
     <br/>
-    Terramate an Infrastructure as Code (IaC) orchestration, collaboration, visibility and observability platform that <strong>unifies</strong>,
-    <strong>simplifies</strong>, and <strong>scales</strong> all your infrastructure code, tools, and workflows.
   </p>
 </p>
 <br/>
@@ -17,7 +15,7 @@
   <a href="https://terramate.io/discord" rel="nofollow"><img src="https://img.shields.io/discord/1088753599951151154?label=Discord&logo=discord&logoColor=white" alt="Discord Server"></a>
 </p>
 <p align="center">
-  <a href="https://terramate.io/docs">📖 Documentation</a> | <a href="https://terramate.io/docs/cli/getting-started">🚀 Getting Started</a> | <a href="https://play.terramate.io">💻 Playground</a> | <a href="https://jobs.ashbyhq.com/terramate" title="Terramate Job Board">🙌 Join Us</a>
+  <a href="https://terramate.io/docs">📖 Terramate Documentation</a> | <a href="https://terramate.io/docs/cli/getting-started">🚀 Getting Started</a> | <a href="https://play.terramate.io">💻 Playground</a> | <a href="https://jobs.ashbyhq.com/terramate" title="Terramate Job Board">🙌 Join Us</a>
 </p>
 
 <br>
@@ -25,7 +23,10 @@
 
 ## Introduction
 
-This template repository provides a pre-configured Terramate project to get started with Terramate and Terraform on AWS using best practices.
+This template repository provides a pre-configured Terramate project to get started with Terramate and Terraform on AWS
+using best practices. It also comes with pre-configured GitOps workflows that run natively in GitHub Actions so that you
+can automate your Terraform in Pull Requests without requiring any additional tooling or infrastructure using the
+Terramate orchestration and change detection.
 
 ### Features
 
@@ -57,7 +58,27 @@ Terraform Remote State Storage and State Locking with AWS S3 and DynamoDB
 
 Pushes data to Terramate Cloud to enable observability, asset management, drift management and Slack notifications.
 
-#### Coming Soon
+#### How do you use this repository?
+
+##### Pre-requisites
+
+Ensure you have the following prerequisites set up by running the commands below:
+
+1. Install asdf: Follow the [official guide](https://asdf-vm.com/guide/getting-started.html).
+
+2. Install required `asdf` plugins for Terramate and Terraform:
+  
+    ```bash
+    asdf plugin add terramate && \
+    asdf plugin add terraform && \
+    asdf plugin add pre-commit && \
+    asdf install
+     ```
+
+3. You need an AWS account (Configure your AWS credentials using one of the supported [authentication mechanisms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication).
+)
+
+#### To Do
 
 - Policies with OPA and/or Sentinel
 - Implement checkov, trivy, terrascan
