@@ -58,9 +58,9 @@ Terraform Remote State Storage and State Locking with AWS S3 and DynamoDB
 
 Pushes data to Terramate Cloud to enable observability, asset management, drift management and Slack notifications.
 
-#### How do you use this repository?
+### How do you use this repository?
 
-##### Pre-requisites
+#### Pre-requisites
 
 Ensure you have the following prerequisites set up by running the commands below:
 
