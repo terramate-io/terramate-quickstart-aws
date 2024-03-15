@@ -64,7 +64,7 @@ jobs:
 
       - name: List changed stacks
         id: list
-        run: terramate list --changed
+        run: terramate list -C stacks --changed
 
       ### Configure cloud credentials
 
