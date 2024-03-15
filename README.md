@@ -60,6 +60,11 @@ Pushes data to Terramate Cloud to enable observability, asset management, drift 
 
 ### How do you use this repository?
 
+#### Create a new repository from this template
+
+Click the *Use this template* button to create your own repository in a GitHub
+account or organization you manage, and let's get started.
+
 #### Pre-requisites
 
 Ensure you have the following prerequisites set up by running the commands below:
@@ -77,6 +82,15 @@ Ensure you have the following prerequisites set up by running the commands below
 
 3. You need an AWS account (Configure your AWS credentials using one of the supported [authentication mechanisms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication).
 )
+
+#### Install pre-commit hooks
+
+We recommend installing the pre-commit hooks in this repository to enable a seamless development flow. The hooks guarantee
+that your Terramate and Terraform code is always up-to-date and well-formatted when committing changes to the repository.
+
+```sh
+pre-commit install
+```
 
 #### To Do
 
