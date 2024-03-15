@@ -47,7 +47,5 @@ generate_hcl "_main.tf" {
         "Name" = "DynamoDB Terraform State Lock Table"
       }
     }
-
-
   }
 }

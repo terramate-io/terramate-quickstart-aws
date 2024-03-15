@@ -1,5 +1,9 @@
 terramate {
   config {
+    experiments = [
+      "scripts", # Enable Terramate Scripts
+    ]
+
     cloud {
       organization = "terramate-demo"
     }
@@ -10,9 +14,9 @@ terramate {
 
       # Optionally disable git safe guards
       # Learn more: https://terramate.io/docs/cli/orchestration/safeguards
-      # check_remote      = false
-      # check_untracked   = false
-      # check_uncommitted = false
+      check_remote      = false
+      check_untracked   = false
+      check_uncommitted = false
     }
 
     run {

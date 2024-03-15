@@ -1,5 +1,5 @@
 generate_hcl "_backend.tf" {
-  # condition = tm_contains(terramate.stack.tags, "terraform")
+  condition = !tm_contains(terramate.stack.tags, "no-backend")
 
   content {
     terraform {
