@@ -40,12 +40,16 @@ Terramate orchestration and change detection.
 
 ### How do you use this repository?
 
-#### Create a new repository from this template
+In this quick-start guide, we'll walk you through the process of deploying a Terraform State Bucket and Workload Identity provider using Terramate and AWS. Let's start by setting up the environment and prerequisites.
+
+**Note**: If you have already set up a Terraform State Bucket and OIDC Authentication via GitHub Actions to AWS, you can skip this guide.
+
+#### 1: Create a new repository from this template
 
 Click the *Use this template* button to create your own repository in a GitHub
 account or organization you manage, and let's get started.
 
-#### Pre-requisites
+#### 2: Pre-requisites
 
 Ensure you have the following prerequisites set up by running the commands below:
 
@@ -63,7 +67,7 @@ Ensure you have the following prerequisites set up by running the commands below
 3. You need an AWS account (Configure your AWS credentials using one of the supported [authentication mechanisms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication).
 )
 
-#### Install pre-commit hooks
+3. Install pre-commit hooks
 
 We recommend installing the pre-commit hooks in this repository to enable a seamless development flow. The hooks guarantee
 that your Terramate and Terraform code is always up-to-date and well-formatted when committing changes to the repository.
@@ -72,37 +76,7 @@ that your Terramate and Terraform code is always up-to-date and well-formatted w
 pre-commit install
 ```
 
-#### To Do
-
-- Policies with OPA and/or Sentinel
-- Implement checkov, trivy, terrascan
-- Implement infracost
-- Configure pre-commit hook
-
-### Terramate-AWS Quickstart: Deploying Terraform State Bucket and Workload Identity Provider
-
-Welcome to the Terramate-AWS Quickstart guide! In this technical guide, we'll walk you through the process of deploying a Terraform State Bucket and Workload Identity provider using Terramate and AWS. Let's start by setting up the environment and prerequisites.
-
-#### Step 1: Get Started
-
-1. **Create a New Repository from Template**:
-   - Click the "Use this template" button on this page to create your own repository from the template in a GitHub account or organization you manage.
-
-#### Step 2: Pre-requisites
-
-Before diving into deployment, ensure you have the following prerequisites set up:
-
-- **Install asdf**: Follow the [official guide](https://asdf-vm.com/guide/getting-started.html) to install asdf.
-- **Install Required asdf Plugins**:
-  ```bash
-  asdf plugin add terramate && \
-  asdf plugin add terraform && \
-  asdf plugin add pre-commit && \
-  asdf install
-  ```
-- **AWS Account**: You need an AWS account. Configure your AWS credentials using one of the supported [authentication mechanisms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication).
-
-#### Step 3: Configuration
+#### 3: Configuration
 
 Next, let's configure the Terraform State Bucket and Workload Identity provider:
 
@@ -169,3 +143,10 @@ This command will move the state of deployed stacks to the S3 bucket.
 #### Conclusion
 
 In conclusion, this guide simplifies the deployment of a Terraform State Bucket and Workload Identity provider using Terramate and AWS. By following the steps, you can configure your environment, generate Terraform files, provision infrastructure on AWS, and migrate state to an S3 bucket seamlessly. With Terramate and AWS, managing infrastructure deployments becomes efficient and straightforward. Enjoy exploring Terramate and AWS integration!
+
+#### To Do
+
+- Policies with OPA and/or Sentinel
+- Implement checkov, trivy, terrascan
+- Implement infracost
+- Configure pre-commit hook
