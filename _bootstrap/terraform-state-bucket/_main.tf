@@ -28,7 +28,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "state-bucket" {
 }
 resource "aws_dynamodb_table" "terraform-lock" {
   hash_key      = "LockID"
-  name          = "terraform_state"
+  name          = "terraform-lock"
   read_capacity = 5
   tags = {
     "Name" = "DynamoDB Terraform State Lock Table"

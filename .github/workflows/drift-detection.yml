@@ -56,10 +56,10 @@ jobs:
 
       - name: Run Terraform init on all stacks
         id: init
-        run: terramate run -- terraform init
+        run: terramate run -C stacks -- terraform init
 
       - name: Run drift detection
         id: drift
-        run: terramate run --cloud-sync-drift-status --cloud-sync-terraform-plan-file=drift.tfplan --continue-on-error -- terraform plan -out drift.tfplan -detailed-exitcode -lock=false
+        run: terramate run -C stacks --cloud-sync-drift-status --cloud-sync-terraform-plan-file=drift.tfplan --continue-on-error -- terraform plan -out drift.tfplan -detailed-exitcode -lock=false
         env:
           GITHUB_TOKEN: ${{ github.token }}

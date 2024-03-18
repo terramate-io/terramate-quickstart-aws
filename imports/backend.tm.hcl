@@ -8,7 +8,7 @@ generate_hcl "_backend.tf" {
         bucket         = global.terraform.backend.bucket
         key            = "terraform/stacks/by-id/${terramate.stack.id}/terraform.tfstate"
         encrypt        = true
-        dynamodb_table = tm_try(global.terraform.backend.dynamo_table, "terraform-lock")
+        dynamodb_table = tm_try(global.terraform.backend.dyanmodb_table, "terraform-lock")
       }
     }
   }
