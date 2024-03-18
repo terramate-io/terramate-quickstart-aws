@@ -79,7 +79,7 @@ pre-commit install
 - Implement infracost
 - Configure pre-commit hook
 
-### Title: Terramate-AWS Quickstart: Deploying Terraform State Bucket and Workload Identity Provider
+### Terramate-AWS Quickstart: Deploying Terraform State Bucket and Workload Identity Provider
 
 Welcome to the Terramate-AWS Quickstart guide! In this technical guide, we'll walk you through the process of deploying a Terraform State Bucket and Workload Identity provider using Terramate and AWS. Let's start by setting up the environment and prerequisites.
 
