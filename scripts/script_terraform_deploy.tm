@@ -3,8 +3,8 @@ script "terraform" "deploy" {
   description = "Run a full Terraform deployment cycle and synchronize the result to Terramate Cloud."
 
   job {
-    # name        = "Terraform Apply"
-    # description = "Initialize, validate, plan, and apply Terraform changes."
+    name        = "Terraform Apply"
+    description = "Initialize, validate, plan, and apply Terraform changes."
     commands = [
       ["terraform", "init", "-lock-timeout=5m"],
       ["terraform", "validate"],
