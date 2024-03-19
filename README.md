@@ -15,7 +15,7 @@
   <a href="https://terramate.io/discord" rel="nofollow"><img src="https://img.shields.io/discord/1088753599951151154?label=Discord&logo=discord&logoColor=white" alt="Discord Server"></a>
 </p>
 <p align="center">
-  <a href="https://terramate.io/docs">📖 Terramate Documentation</a> | <a href="https://terramate.io/docs/cli/getting-started">🚀 Getting Started</a> | <a href="https://play.terramate.io">💻 Playground</a> | <a href="https://jobs.ashbyhq.com/terramate" title="Terramate Job Board">🙌 Join Us</a>
+  <a href="https://terramate.io/docs">📖 Terramate Docs</a> | <a href="https://terramate.io/docs/cli/getting-started">🚀 Getting Started</a> | <a href="https://play.terramate.io">💻 Playground</a> | <a href="https://jobs.ashbyhq.com/terramate" title="Terramate Job Board">🙌 Join Us</a>
 </p>
 
 <br>
@@ -23,7 +23,7 @@
 
 ## Introduction
 
-This template repository provides a pre-configured Terramate project to get started with Terramate and Terraform on AWS
+This template repository provides a pre-configured Terramate project to get started with **Terramate** and **Terraform** on **AWS**
 using best practices. It also comes with pre-configured GitOps workflows that run natively in GitHub Actions so that you
 can automate your Terraform in Pull Requests without requiring any additional tooling or infrastructure using the
 Terramate orchestration and change detection.
@@ -38,18 +38,14 @@ Terramate orchestration and change detection.
 - **Terraform S3 Remote State Backend**: Terraform Remote State Storage and State Locking with AWS S3 and DynamoDB.
 - **Terramate Cloud Integration**: Pushes data to Terramate Cloud for observability, asset management, drift management, and Slack notifications.
 
-### How do you use this repository?
+## How do you use this repository?
 
-In this quick-start guide, we'll walk you through the process of deploying a Terraform State Bucket and Workload Identity provider using Terramate and AWS. Let's start by setting up the environment and prerequisites.
-
-**Note**: If you have already set up a Terraform State Bucket and OIDC Authentication via GitHub Actions to AWS, you can skip this guide.
-
-#### 1: Create a new repository from this template
+### 1: Create a new repository from this template
 
 Click the *Use this template* button to create your own repository in a GitHub
 account or organization you manage, and let's get started.
 
-#### 2: Pre-requisites
+### 2: Pre-requisites
 
 Ensure you have the following prerequisites set up by running the commands below:
 
@@ -64,10 +60,11 @@ Ensure you have the following prerequisites set up by running the commands below
     asdf install
      ```
 
-3. You need an AWS account (Configure your AWS credentials using one of the supported [authentication mechanisms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication).
-)
+3. *(Optional)* If you need to create a Terraform State Bucket and Workload Identity Provider, you need to configure your AWS
+credentials using one of the supported [authentication mechanisms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication).
+(We recommend you use [aws-vault](https://github.com/99designs/aws-vault) for secure authentication.)
 
-3. Install pre-commit hooks
+3. *(Optional)* Install [pre-commit](https://pre-commit.com/) hooks
 
 We recommend installing the pre-commit hooks in this repository to enable a seamless development flow. The hooks guarantee
 that your Terramate and Terraform code is always up-to-date and well-formatted when committing changes to the repository.
@@ -76,42 +73,40 @@ that your Terramate and Terraform code is always up-to-date and well-formatted w
 pre-commit install
 ```
 
-#### 3: Configuration
+### Configure Terraform State Bucket and Workload Identity Provider
 
-Next, let's configure the Terraform State Bucket and Workload Identity provider:
+This repository comes with a pre-configured Terraform S3 State Bucket, DynamoDB Lock Table and Workload Identity Provider to enable keyless authentication from GitHub Actions to AWS.
 
-1. **Configure AWS CLI or aws-vault**:
-   - Make sure your AWS CLI is configured or set up [aws-vault](https://github.com/99designs/aws-vault) for secure authentication.
+#### Update Terramate Configurations
 
-2. **Update Terraform Configurations**:
-   - Navigate to the `config.tm.hcl` file in your project's root directory.
-   - Replace the default Terraform State Bucket name with a name of your choice.
+- Navigate to the `config.tm.hcl` file in your project's root directory.
+- Replace the default Terraform State Bucket name with a name of your choice.
 ```bash
 globals "terraform" "backend" {
   bucket = "any-name-you-want"
   region = "us-east-1"
 }
 ```
-   - Update the GitHub repository name for the workload identity provider with your repository (`<githubuserororganization/repository-name>`).
+
+- Update the GitHub repository name for the workload identity provider with your repository (`<githubuserororganization/repository-name>`).
 ```bash
 globals "aws" "oidc" {
   github_repositories = [
-    "your-github-username/repository-name",
-    # "another-org/another-repo:ref:refs/heads/main",
+    "your-github-username-or-organization/repository-name",
   ]
 }
 ```
 
-#### Step 4: Generate Terraform Files
+#### Generate Terraform Files from Terramate Configurations
 
 Generate Terraform files using Terramate:
 ```bash
 terramate generate
 ```
-The `terramate generate` command generates files/code in stacks and helps to keep your stacks [DRY](https://terramate.io/docs/cli/code-generation/#introduction). In the `/terraform-state-bucket` directory, the `config.tm.hcl` file includes a `generate_hcl` block which specifies the HCL code that will be generated by the generate command.
+The `terramate generate` command generates files/code in stacks and helps to keep your stacks [DRY](https://terramate.io/docs/cli/code-generation/#introduction). In the `_bootstrap/terraform-state-bucket` directory, the `config.tm.hcl` file includes a `generate_hcl` block which specifies the HCL code that will be generated by the generate command.
 Because we run the command without specifying the [context](https://terramate.io/docs/cli/code-generation/#generation-context), the default `stack` context is used and generates code relative to the stack where the config file is defined(`terraform-state-bucket` stack in this case). The generated code can be located in the `_main.tf` file within the same directory.
 
-#### Step 5: Provision Infrastructure on AWS
+####  Provision Infrastructure on AWS
 
 To deploy the generated resources to AWS, use the following commands:
 
@@ -120,12 +115,13 @@ terramate run -C _bootstrap terraform init
 terramate run -C _bootstrap terraform apply
 ```
 
-The `init` command initializes Terraform and downloads necessary dependencies like the AWS provider.
-The `apply` command provisions or updates infrastructure resources according to the Terraform configuration.
+#### Migrate State to S3 Bucket
 
-#### Step 6: Migrate State to S3 Bucket
+Now that we have the Terraform State Bucket deployed, we want to move the state of the newly deployed bucket and workload
+identity provider into the bucket.
 
-1. Remove `tags = ["no-backend"]` from `stack.tm.hcl` files of the `_bootstrap/oidc-aws-github` & `/bootstrap/terraform-state-bucket` directories.
+1. Remove `tags = ["no-backend"]` from `stack.tm.hcl` files of the `_bootstrap/oidc-aws-github` and
+`/bootstrap/terraform-state-bucket` directories.
 
 2. Generate Terraform configuration files:
 ```bash
@@ -139,10 +135,12 @@ terramate run -C _bootstrap terraform init
 ```
 This command will move the state of deployed stacks to the S3 bucket.
 
+### Create Terramate Cloud Account
 
-#### Conclusion
+#### Create a new Organization
 
-In conclusion, this guide simplifies the deployment of a Terraform State Bucket and Workload Identity provider using Terramate and AWS. By following the steps, you can configure your environment, generate Terraform files, provision infrastructure on AWS, and migrate state to an S3 bucket seamlessly. With Terramate and AWS, managing infrastructure deployments becomes efficient and straightforward. Enjoy exploring Terramate and AWS integration!
+#### Configure Slack Notifications
+
 
 #### To Do
 
