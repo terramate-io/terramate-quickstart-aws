@@ -17,7 +17,6 @@ jobs:
       checks: read
 
     steps:
-
       ### Create Pull Request comment
 
       - name: Prepare pull request preview comment
@@ -78,7 +77,6 @@ jobs:
           AWS_REGION: us-east-1
           AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
 
-
       - name: Verify AWS credentials
         if: steps.list.outputs.stdout
         run: aws sts get-caller-identity
@@ -108,7 +106,7 @@ jobs:
         run: |
           echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
           echo >>pr-comment.txt
-          echo >>pr-comment.txt "[:mag: View Details on Terramate Cloud]($(cat preview_url.txt))"
+          echo >>pr-comment.txt "[:mag: View Details on Terramate Cloud]($(cat stacks/preview_url.txt))"
           echo >>pr-comment.txt
           echo >>pr-comment.txt "### Changed Stacks"
           echo >>pr-comment.txt
@@ -139,7 +137,7 @@ jobs:
         run: |
           echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
           echo >>pr-comment.txt
-          echo >>pr-comment.txt "[:mag: View Details on Terramate Cloud]($(cat preview_url.txt))"
+          echo >>pr-comment.txt "[:mag: View Details on Terramate Cloud]($(cat stacks/preview_url.txt))"
           echo >>pr-comment.txt
           echo >>pr-comment.txt "### Changed Stacks"
           echo >>pr-comment.txt
