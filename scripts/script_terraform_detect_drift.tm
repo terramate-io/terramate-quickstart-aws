@@ -3,8 +3,8 @@ script "terraform" "detect-drift" {
   description = "Detect drifts in Terraform configuration and synchronize it to Terramate Cloud."
 
   job {
-    # name        = "Terraform Plan"
-    # description = "Initialize, validate, and plan Terraform changes."
+    name        = "Terraform Plan"
+    description = "Initialize, validate, and plan Terraform changes."
     commands = [
       ["terraform", "init", "-lock-timeout=5m"],
       ["terraform", "plan", "-out", "drift.tfplan", "-detailed-exitcode", "-lock=false", {
