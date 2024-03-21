@@ -1,4 +1,4 @@
-generate_hcl "_backend.tf" {
+generate_hcl "backend.tf" {
   condition = !tm_contains(terramate.stack.tags, "no-backend")
 
   content {
