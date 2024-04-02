@@ -61,7 +61,7 @@ Ensure you have the following prerequisites set up by running the commands below
      ```
 
 3. *(Optional)* If you need to create a Terraform State Bucket and Workload Identity Provider, you need to configure your AWS
-credentials using one of the supported [authentication mechanisms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication).
+credentials using one of the supported [authentication mechanisms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication-and-configuration).
 (We recommend you use [aws-vault](https://github.com/99designs/aws-vault) for secure authentication.)
 
 3. *(Optional)* Install [pre-commit](https://pre-commit.com/) hooks
