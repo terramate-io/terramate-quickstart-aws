@@ -1,5 +1,5 @@
 globals "terraform" {
-  version = "1.7.1"
+  version = "1.7.5"
 }
 
 globals "terraform" "backend" {
