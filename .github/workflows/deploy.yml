@@ -1,3 +1,4 @@
+---
 name: Terraform Deployment
 
 on:
@@ -42,12 +43,12 @@ jobs:
 
       - name: List changed stacks
         id: list
-        run: terramate list -C stacks --changed
+        run: echo "changed_stacks=$(terramate -C stacks list --changed)" >> $GITHUB_OUTPUT
 
       ### Configure cloud credentials
 
       - name: Configure AWS credentials
-        if: steps.list.outputs.stdout
+        if: steps.list.outputs.changed_stacks
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-region: ${{ env.AWS_REGION }}
@@ -57,13 +58,13 @@ jobs:
           AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
 
       - name: Verify AWS credentials
-        if: steps.list.outputs.stdout
+        if: steps.list.outputs.changed_stacks
         run: aws sts get-caller-identity
 
       ### Run the Terraform deployment via Terramate in each changed stack
 
       - name: Run Terraform init on changed stacks
-        if: steps.list.outputs.stdout
+        if: steps.list.outputs.changed_stacks
         id: init
         run: |
           terramate run \
@@ -73,7 +74,7 @@ jobs:
             terraform init
 
       - name: Create Terraform plan on changed stacks
-        if: steps.list.outputs.stdout
+        if: steps.list.outputs.changed_stacks
         id: plan
         run: |
           terramate run \
@@ -84,7 +85,7 @@ jobs:
 
       - name: Apply planned changes on changed stacks
         id: apply
-        if: steps.list.outputs.stdout
+        if: steps.list.outputs.changed_stacks
         run: |
           terramate run \
             -C stacks \
@@ -97,7 +98,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Run drift detection
-        if: steps.list.outputs.stdout && ! cancelled() && steps.apply.outcome != 'skipped'
+        if: steps.list.outputs.changed_stacks && ! cancelled() && steps.apply.outcome != 'skipped'
         run: |
           terramate run \
             -C stacks \

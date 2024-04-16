@@ -1,3 +1,4 @@
+---
 name: Scheduled Terraform Drift Detection
 
 on:
