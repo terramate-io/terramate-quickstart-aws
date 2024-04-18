@@ -1,7 +1,7 @@
 
 locals {
   name = "main-vpc"
-  cidr = "10.0.0.0/16"
+  cidr = "10.10.0.0/16"
 }
 
 module "vpc" {
