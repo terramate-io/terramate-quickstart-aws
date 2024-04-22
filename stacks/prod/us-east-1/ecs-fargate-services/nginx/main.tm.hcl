@@ -2,7 +2,7 @@ generate_hcl "main.tf" {
   inherit = false
 
   lets {
-    container_port = 3000
+    container_port = 80
   }
 
   content {

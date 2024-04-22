@@ -51,8 +51,8 @@ module "ecs_service" {
       port_mappings = [
         {
           name          = "nginx"
-          containerPort = 3000
-          hostPort      = 3000
+          containerPort = 80
+          hostPort      = 80
           protocol      = "tcp"
         },
       ]
@@ -63,15 +63,15 @@ module "ecs_service" {
     service = {
       target_group_arn = data.aws_lb_target_group.target_group.arn
       container_name   = "nginx"
-      container_port   = 3000
+      container_port   = 80
     }
   }
   name = "nginx"
   security_group_rules = {
     alb_ingress_3000 = {
       type                     = "ingress"
-      from_port                = 3000
-      to_port                  = 3000
+      from_port                = 80
+      to_port                  = 80
       protocol                 = "tcp"
       description              = "Service port"
       source_security_group_id = data.aws_security_group.security_group.id
