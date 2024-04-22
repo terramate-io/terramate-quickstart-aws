@@ -36,7 +36,7 @@ generate_hcl "main.tf" {
     }
 
     data "aws_lb_target_group" "target_group" {
-      name = "ex_ecs"
+      name = "tf-20240422214757001900000002"
 
       depends_on = [
         null_resource.initial_deployment_trigger
