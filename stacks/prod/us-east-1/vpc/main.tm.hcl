@@ -24,6 +24,14 @@ generate_hcl "main.tf" {
       enable_nat_gateway = tm_try(global.vpc.enable_nat_gateway, true)
       enable_vpn_gateway = tm_try(global.vpc.enable_vpn_gateway, true)
 
+      public_subnet_tags = {
+        Tier = "public"
+      }
+
+      private_subnet_tags = {
+        Tier = "private"
+      }
+
       tags = tm_try(global.tags, {})
     }
   }
