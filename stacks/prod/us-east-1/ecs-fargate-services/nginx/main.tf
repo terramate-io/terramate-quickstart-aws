@@ -32,7 +32,7 @@ data "aws_lb_target_group" "target_group" {
   depends_on = [
     null_resource.initial_deployment_trigger,
   ]
-  name = "ex_ecs"
+  name = "tf-20240422214757001900000002"
 }
 data "aws_security_group" "security_group" {
   depends_on = [
