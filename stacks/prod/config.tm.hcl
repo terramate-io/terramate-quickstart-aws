@@ -1,6 +1,7 @@
 globals "terraform" "module" "version" {
   vpc         = "5.7.1"
   ecs_cluster = "5.11.1"
+  alb         = "9.9.0"
 }
 
 globals "vpc" {
