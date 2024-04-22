@@ -76,6 +76,7 @@ generate_hcl "main.tf" {
               protocol      = "tcp"
             }
           ]
+          readonly_root_filesystem = false
         }
       }
 
