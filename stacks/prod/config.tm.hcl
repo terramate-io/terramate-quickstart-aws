@@ -1,4 +1,4 @@
-globals "terraform" "modules" "versions" {
+globals "terraform" "module" "version" {
   vpc = "5.7.1"
 }
 
@@ -10,6 +10,7 @@ globals "vpc" {
 
 globals {
   tags = {
-    Env = "Prod"
+    Environment = "prd"
+    Terraform   = "true"
   }
 }

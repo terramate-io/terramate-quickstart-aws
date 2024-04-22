@@ -4,7 +4,7 @@ generate_hcl "main.tf" {
   content {
     module "vpc" {
       source  = "terraform-aws-modules/vpc/aws"
-      version = global.terraform.modules.versions.vpc
+      version = global.terraform.module.version.vpc
 
       name = global.vpc.name
       cidr = global.vpc.cidr

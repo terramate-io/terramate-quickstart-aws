@@ -22,7 +22,8 @@ module "vpc" {
   ]
   source = "terraform-aws-modules/vpc/aws"
   tags = {
-    Env = "Prod"
+    Environment = "prd"
+    Terraform   = "true"
   }
   version = "5.7.1"
 }
