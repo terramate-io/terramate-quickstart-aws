@@ -41,13 +41,13 @@ jobs:
       ### Check for changed stacks
 
       - name: List changed stacks
-        id: list
+        id: list-changed
         run: terramate list -C stacks --changed
 
       ### Configure cloud credentials
 
       - name: Configure AWS credentials
-        if: steps.list.outputs.stdout
+        if: steps.list-changed.outputs.stdout
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-region: ${{ env.AWS_REGION }}
@@ -57,54 +57,28 @@ jobs:
           AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
 
       - name: Verify AWS credentials
-        if: steps.list.outputs.stdout
+        if: steps.list-changed.outputs.stdout
         run: aws sts get-caller-identity
 
       ### Run the Terraform deployment via Terramate in each changed stack
 
-      - name: Run Terraform init on changed stacks
-        if: steps.list.outputs.stdout
-        id: init
-        run: |
-          terramate run \
-            -C stacks \
-            --changed \
-            -- \
-            terraform init
-
-      - name: Create Terraform plan on changed stacks
-        if: steps.list.outputs.stdout
-        id: plan
-        run: |
-          terramate run \
-            -C stacks \
-            --changed \
-            -- \
-            terraform plan -lock-timeout=5m -out out.tfplan
-
       - name: Apply planned changes on changed stacks
-        id: apply
-        if: steps.list.outputs.stdout
+        id: deploy
+        if: steps.list-changed.outputs.stdout
         run: |
-          terramate run \
+          terramate run-script \
             -C stacks \
             --changed \
-            --cloud-sync-deployment \
-            --cloud-sync-terraform-plan-file=out.tfplan \
-            -- \
-            terraform apply -input=false -auto-approve -lock-timeout=5m out.tfplan
+            terraform deploy
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Run drift detection
-        if: steps.list.outputs.stdout && ! cancelled() && steps.apply.outcome != 'skipped'
+        if: steps.list-changed.outputs.stdout && ! cancelled() && steps.deploy.outcome != 'skipped'
         run: |
-          terramate run \
+          terramate run-script \
             -C stacks \
             --changed \
-            --cloud-sync-drift-status \
-            --cloud-sync-terraform-plan-file=drift.tfplan \
-            -- \
-            terraform plan -out drift.tfplan -detailed-exitcode
+            terraform detect-drift
         env:
           GITHUB_TOKEN: ${{ github.token }}
