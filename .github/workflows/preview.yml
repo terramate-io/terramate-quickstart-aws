@@ -86,10 +86,10 @@ jobs:
       - name: Run Terraform init on all changed stacks
         if: steps.list-changed.outputs.stdout
         run: |
-          terramate run-script \
+          terramate script run \
             -C stacks \
-            --changed
-            --parallel 1
+            --changed \
+            --parallel 1 \
             terraform init
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -97,7 +97,7 @@ jobs:
       - name: Plan Terraform changes in changed stacks
         if: steps.list-changed.outputs.stdout
         run: |
-          terramate run-script \
+          terramate script run \
             -C stacks \
             --changed \
             --parallel 5 \
