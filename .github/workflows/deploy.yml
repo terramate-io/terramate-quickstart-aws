@@ -62,12 +62,24 @@ jobs:
 
       ### Run the Terraform deployment via Terramate in each changed stack
 
+      - name: Run Terraform init on all changed stacks
+        if: steps.list-changed.outputs.stdout
+        run: |
+          terramate run-script \
+            -C stacks \
+            --parallel 1
+            --changed
+            terraform init
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
       - name: Apply planned changes on changed stacks
         id: deploy
         if: steps.list-changed.outputs.stdout
         run: |
           terramate run-script \
             -C stacks \
+            --parallel 5
             --changed \
             terraform deploy
         env:
@@ -78,6 +90,7 @@ jobs:
         run: |
           terramate run-script \
             -C stacks \
+            --parallel 5
             --changed \
             terraform detect-drift
         env:

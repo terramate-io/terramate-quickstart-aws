@@ -39,9 +39,16 @@ jobs:
           asdf plugin add terraform
           asdf install terraform
 
+      ### Check for drifted stacks
+
+      - name: List changed stacks
+        id: list-drifted
+        run: terramate list -C stacks --cloud-status=drifted
+
       ### Configure cloud credentials
 
       - name: Configure AWS credentials
+        if: steps.list-drifted.outputs.stdout
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-region: ${{ env.AWS_REGION }}
@@ -51,23 +58,44 @@ jobs:
           AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
 
       - name: Verify AWS credentials
+        if: steps.list-drifted.outputs.stdout
         run: aws sts get-caller-identity
 
       ### Run Dift Check
 
       - name: Run Terraform init on all stacks
-        id: init
-        run: terramate run -C stacks -- terraform init
+        if: steps.list-drifted.outputs.stdout
+        run: |
+          terramate run-script \
+            -C stacks \
+            --parallel 1
+            terraform init
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Run drift detection
-        id: drift
+        if: steps.list-drifted.outputs.stdout
+        id: drift-detect
         run: |
-          terramate run \
+          terramate run-script \
             -C stacks \
-            --cloud-sync-drift-status \
-            --cloud-sync-terraform-plan-file=drift.tfplan \
+            --parallel 5 \
             --continue-on-error \
             -- \
-            terraform plan -out drift.tfplan -detailed-exitcode -lock=false
+            terraform drift detect
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Run drift reconciliation
+        if: steps.list-drifted.outputs.stdout
+        id: drift-reconcile
+        run: |
+          terramate run-script \
+            -C stacks \
+            --tags reconcile \
+            --parallel 5
+            --continue-on-error \
+            -- \
+            terraform drift reconcile
         env:
           GITHUB_TOKEN: ${{ github.token }}
