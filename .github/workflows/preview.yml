@@ -62,13 +62,13 @@ jobs:
       ### Check for changed stacks
 
       - name: List changed stacks
-        id: list
+        id: list-changed
         run: terramate list -C stacks --changed
 
       ### Configure cloud credentials
 
       - name: Configure AWS credentials
-        if: steps.list.outputs.stdout
+        if: steps.list-changed.outputs.stdout
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-region: ${{ env.AWS_REGION }}
@@ -78,51 +78,40 @@ jobs:
           AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
 
       - name: Verify AWS credentials
-        if: steps.list.outputs.stdout
+        if: steps.list-changed.outputs.stdout
         run: aws sts get-caller-identity
 
       ### Run the Terraform preview via Terramate in each changed stack
 
-      - name: Initialize Terraform in changed stacks
-        if: steps.list.outputs.stdout
+      - name: Run Terraform init on all changed stacks
+        if: steps.list-changed.outputs.stdout
         run: |
-          terramate run \
+          terramate run-script \
             -C stacks \
-            --parallel 1 \
-            --changed \
-            -- \
-            terraform init -lock-timeout=5m
-
-      - name: Validate Terraform configuration in changed stacks
-        if: steps.list.outputs.stdout
-        run: |
-          terramate run \
-            -C stacks \
-            --parallel 5  \
-            --changed \
-            -- \
-            terraform validate
+            --changed
+            --parallel 1
+            terraform init
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Plan Terraform changes in changed stacks
-        if: steps.list.outputs.stdout
+        if: steps.list-changed.outputs.stdout
         run: |
-          terramate run \
+          terramate run-script \
             -C stacks \
-            --parallel 5 \
             --changed \
-            --cloud-sync-preview \
-            --cloud-sync-terraform-plan-file=out.tfplan \
+            --parallel 5 \
             --debug-preview-url preview_url.txt \
             --continue-on-error \
             -- \
-            terraform plan -out out.tfplan -detailed-exitcode -lock=false
+            terraform preview
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
       ### Update Pull Request comment
 
       - name: Generate preview details
-        if: steps.list.outputs.stdout
+        if: steps.list-changed.outputs.stdout
         id: comment
         run: |
           echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
@@ -132,7 +121,7 @@ jobs:
           echo >>pr-comment.txt "### Changed Stacks"
           echo >>pr-comment.txt
           echo >>pr-comment.txt '```bash'
-          echo >>pr-comment.txt "${{ steps.list.outputs.stdout }}"
+          echo >>pr-comment.txt "${{ steps.list-changed.outputs.stdout }}"
           echo >>pr-comment.txt '```'
           echo >>pr-comment.txt
           echo >>pr-comment.txt "#### Terraform Plan"
@@ -144,7 +133,7 @@ jobs:
           cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
 
       - name: Generate preview when no stacks changed
-        if: success() && !steps.list.outputs.stdout
+        if: success() && !steps.list-changed.outputs.stdout
         run: |
           echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
           echo >>pr-comment.txt
@@ -163,7 +152,7 @@ jobs:
           echo >>pr-comment.txt "### Changed Stacks"
           echo >>pr-comment.txt
           echo >>pr-comment.txt '```bash'
-          echo >>pr-comment.txt "${{ steps.list.outputs.stdout }}"
+          echo >>pr-comment.txt "${{ steps.list-changed.outputs.stdout }}"
           echo >>pr-comment.txt '```'
           echo >>pr-comment.txt ':boom: Generating preview failed. Please see details in Actions output.'
           cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
