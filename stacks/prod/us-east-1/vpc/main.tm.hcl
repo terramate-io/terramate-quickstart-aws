@@ -26,6 +26,7 @@ generate_hcl "main.tf" {
 
       public_subnet_tags = {
         Tier = "public"
+        Bar  = "foo"
       }
 
       private_subnet_tags = {
