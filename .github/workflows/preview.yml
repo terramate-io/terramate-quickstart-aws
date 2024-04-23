@@ -101,7 +101,6 @@ jobs:
             -C stacks \
             --changed \
             --parallel 5 \
-            --debug-preview-url preview_url.txt \
             --continue-on-error \
             -- \
             terraform preview
