@@ -12,6 +12,7 @@ module "vpc" {
   name               = "prd-vpc"
   private_subnet_tags = {
     Tier = "private"
+    Foo  = "bar"
   }
   private_subnets = [
     "10.0.1.0/24",

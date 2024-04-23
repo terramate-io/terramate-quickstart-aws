@@ -30,6 +30,7 @@ generate_hcl "main.tf" {
 
       private_subnet_tags = {
         Tier = "private"
+        Foo  = "bar"
       }
 
       tags = tm_try(global.tags, {})
