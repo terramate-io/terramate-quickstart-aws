@@ -1,4 +1,4 @@
-generate_hcl "main.tf" {
+generate_hcl "alb.tf" {
   inherit = false
 
   content {
