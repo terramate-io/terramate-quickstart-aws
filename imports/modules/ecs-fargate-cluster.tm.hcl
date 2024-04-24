@@ -1,4 +1,4 @@
-generate_hcl "main.tf" {
+generate_hcl "ecs-fargate-cluster.tf" {
   inherit = false
 
   content {
