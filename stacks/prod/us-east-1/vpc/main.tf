@@ -20,7 +20,7 @@ module "vpc" {
   ]
   public_subnet_tags = {
     Tier = "public"
-    Bar  = "foo"
+    Bar  = "faa"
   }
   public_subnets = [
     "10.0.101.0/24",
