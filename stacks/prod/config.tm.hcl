@@ -15,6 +15,10 @@ globals "ecs" {
   cluster_name = "prd-ecs-cluster"
 }
 
+globals "alb" {
+  name = "production-alb"
+}
+
 globals {
   tags = {
     Environment = "prd"
