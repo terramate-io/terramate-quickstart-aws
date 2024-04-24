@@ -2,12 +2,12 @@ name: Scheduled Terraform Drift Detection
 
 on:
   schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron: '*/30 * * * *'
+    # Run this workflow at the top of every hour
+    - cron: '0 * * * *'
 
 jobs:
   drift-detection:
-    name: Check Drift
+    name: Detect and reconcile drift in Terraform stacks
 
     permissions:
       id-token: write
@@ -55,7 +55,7 @@ jobs:
 
       ### Run Dift Check
 
-      - name: Run Terraform init on all stacks
+      - name: Run Terraform init in all stacks
         run: |
           terramate script run \
             -C stacks \
