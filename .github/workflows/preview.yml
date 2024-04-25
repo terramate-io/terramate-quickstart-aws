@@ -7,7 +7,7 @@ on:
 
 jobs:
   preview:
-    name: Plan Terraform changes in changed Terramate stacks
+    name: Plan Terraform changes in changed stacks
     runs-on: ubuntu-latest
 
     permissions:
@@ -83,7 +83,7 @@ jobs:
 
       ### Run the Terraform preview via Terramate in each changed stack
 
-      - name: Run Terraform init on all changed stacks
+      - name: Run Terraform init in all changed stacks
         if: steps.list-changed.outputs.stdout
         run: |
           terramate script run \

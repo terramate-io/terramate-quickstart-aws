@@ -62,7 +62,7 @@ jobs:
 
       ### Run the Terraform deployment via Terramate in each changed stack
 
-      - name: Run Terraform init on all changed stacks
+      - name: Run Terraform init in all changed stacks
         if: steps.list-changed.outputs.stdout
         run: |
           terramate script run \
@@ -73,7 +73,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Apply planned changes on changed stacks
+      - name: Run Terraform apply in all changed stacks
         id: deploy
         if: steps.list-changed.outputs.stdout
         run: |
@@ -85,7 +85,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Run drift detection
+      - name: Run drift detection in all deployed stacks
         if: steps.list-changed.outputs.stdout && ! cancelled() && steps.deploy.outcome != 'skipped'
         run: |
           terramate script run \
