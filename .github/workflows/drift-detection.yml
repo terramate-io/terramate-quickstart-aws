@@ -40,6 +40,11 @@ jobs:
           asdf plugin add terraform
           asdf install terraform
 
+      - name: Install OpenTofu with asdf
+        run: |
+          asdf plugin add opentofu
+          asdf install opentofu
+
       ### Configure cloud credentials
 
       - name: Configure AWS credentials

@@ -51,6 +51,11 @@ jobs:
           asdf plugin add terraform
           asdf install terraform
 
+      - name: Install OpenTofu with asdf
+        run: |
+          asdf plugin add opentofu
+          asdf install opentofu
+
       ### Linting
 
       - name: Check Terramate formatting
