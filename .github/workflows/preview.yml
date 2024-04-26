@@ -90,7 +90,7 @@ jobs:
             -C stacks \
             --changed \
             --parallel 1 \
-            terraform init
+            init
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -103,7 +103,7 @@ jobs:
             --parallel 5 \
             --continue-on-error \
             -- \
-            terraform preview
+            preview
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -126,8 +126,14 @@ jobs:
           echo >>pr-comment.txt "#### Terraform Plan"
           echo >>pr-comment.txt
           echo >>pr-comment.txt '```terraform'
-          terramate run -C stacks --changed -- terraform show -no-color out.tfplan |& dd bs=1024 count=248 >>pr-comment.txt
+          terramate run -C stacks/terraform --changed -- terraform show -no-color out.tfplan |& dd bs=1024 count=248 >>pr-comment.txt
           [ "${PIPESTATUS[0]}" == "141" ] && sed -i 's/#### Terraform Plan/#### :warning: Terraform Plan truncated: please check console output :warning:/' pr-comment.txt
+          echo >>pr-comment.txt '```'
+          echo >>pr-comment.txt "#### OpenTofu Plan"
+          echo >>pr-comment.txt
+          echo >>pr-comment.txt '```terraform'
+          terramate run -C stacks/opentofu --changed -- tofu show -no-color out.tfplan |& dd bs=1024 count=248 >>pr-comment.txt
+          [ "${PIPESTATUS[0]}" == "141" ] && sed -i 's/#### OpenTofu Plan/#### :warning: OpenTofu Plan truncated: please check console output :warning:/' pr-comment.txt
           echo >>pr-comment.txt '```'
           cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
 

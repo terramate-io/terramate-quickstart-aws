@@ -69,7 +69,7 @@ jobs:
             -C stacks \
             --parallel 1 \
             --changed \
-            terraform init
+            init
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -81,7 +81,7 @@ jobs:
             -C stacks \
             --parallel 5 \
             --changed \
-            terraform deploy
+            deploy
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -92,6 +92,6 @@ jobs:
             -C stacks \
             --parallel 5 \
             --changed \
-            terraform drift detect
+            drift detect
         env:
           GITHUB_TOKEN: ${{ github.token }}

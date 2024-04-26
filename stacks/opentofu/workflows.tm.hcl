@@ -1,4 +1,4 @@
-script "tofu" "init" {
+script "init" {
   name        = "OpenTofu Init"
   description = "Downloads the required provider plugins and modules and setting up the backend"
 
@@ -9,7 +9,7 @@ script "tofu" "init" {
   }
 }
 
-script "tofu" "preview" {
+script "preview" {
   name        = "OpenTofu Deployment Preview"
   description = "Create a preview of OpenTofu Changes and synchronize it to Terramate Cloud."
 
@@ -24,7 +24,7 @@ script "tofu" "preview" {
   }
 }
 
-script "tofu" "deploy" {
+script "deploy" {
   name        = "OpenTofu Deployment"
   description = "Run a full OpenTofu deployment cycle and synchronize the result to Terramate Cloud."
 
@@ -40,7 +40,7 @@ script "tofu" "deploy" {
   }
 }
 
-script "tofu" "drift" "detect" {
+script "drift" "detect" {
   name        = "OpenTofu Drift Check"
   description = "Detect drifts in OpenTofu configuration and synchronize it to Terramate Cloud."
 
@@ -54,7 +54,7 @@ script "tofu" "drift" "detect" {
   }
 }
 
-script "tofu" "drift" "reconcile" {
+script "drift" "reconcile" {
   name        = "OpenTofu Drift Reconciliation"
   description = "Reconciles drifts in all changed stacks."
 

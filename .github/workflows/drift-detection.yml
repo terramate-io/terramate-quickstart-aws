@@ -61,7 +61,7 @@ jobs:
           terramate script run \
             -C stacks \
             --parallel 1 \
-            terraform init
+            init
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -73,7 +73,7 @@ jobs:
             --parallel 5 \
             --continue-on-error \
             -- \
-            terraform drift detect
+            drift detect
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -87,6 +87,6 @@ jobs:
             --parallel 5 \
             --continue-on-error \
             -- \
-            terraform drift reconcile
+            drift reconcile
         env:
           GITHUB_TOKEN: ${{ github.token }}
