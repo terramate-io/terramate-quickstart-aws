@@ -8,8 +8,8 @@ script "terraform" "detect-drift" {
     commands = [
       ["terraform", "init", "-lock-timeout=5m"],
       ["terraform", "plan", "-out", "drift.tfplan", "-detailed-exitcode", "-lock=false", {
-        cloud_sync_drift_status        = true
-        cloud_sync_terraform_plan_file = "drift.tfplan"
+        sync_drift_status   = true
+        terraform_plan_file = "drift.tfplan"
       }],
     ]
   }

@@ -3,7 +3,7 @@ name: Scheduled Terraform Drift Detection
 on:
   schedule:
     # Run this workflow at the top of every hour
-    - cron: '0 * * * *'
+    - cron: "0 * * * *"
 
 jobs:
   drift-detection:
@@ -82,7 +82,7 @@ jobs:
           terramate script run \
             -C stacks \
             --tags reconcile \
-            --cloud-status=drifted \
+            --status=drifted \
             --parallel 5 \
             --continue-on-error \
             -- \
