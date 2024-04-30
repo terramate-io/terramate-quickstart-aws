@@ -1,4 +1,4 @@
-script "terraform" "init" {
+script "init" {
   name        = "Terraform Init"
   description = "Downloads the required provider plugins and modules and setting up the backend"
 
@@ -9,7 +9,7 @@ script "terraform" "init" {
   }
 }
 
-script "terraform" "preview" {
+script "preview" {
   name        = "Terraform Deployment Preview"
   description = "Create a preview of Terraform Changes and synchronize it to Terramate Cloud."
 
@@ -24,7 +24,7 @@ script "terraform" "preview" {
   }
 }
 
-script "terraform" "deploy" {
+script "deploy" {
   name        = "Terraform Deployment"
   description = "Run a full Terraform deployment cycle and synchronize the result to Terramate Cloud."
 
@@ -40,7 +40,7 @@ script "terraform" "deploy" {
   }
 }
 
-script "terraform" "drift" "detect" {
+script "drift" "detect" {
   name        = "Terraform Drift Check"
   description = "Detect drifts in Terraform configuration and synchronize it to Terramate Cloud."
 
@@ -54,7 +54,7 @@ script "terraform" "drift" "detect" {
   }
 }
 
-script "terraform" "drift" "reconcile" {
+script "drift" "reconcile" {
   name        = "Terraform Drift Reconciliation"
   description = "Reconciles drifts in all changed stacks."
 
