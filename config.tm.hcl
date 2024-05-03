@@ -3,9 +3,8 @@ globals "terraform" {
 }
 
 globals "terraform" "backend" {
-  bucket         = "terramate-example-terraform-state-backend"
-  dyanmodb_table = "terraform-lock"
-  region         = "us-east-1"
+  bucket = "terramate-example-terraform-state-backend"
+  region = "us-east-1"
 }
 
 globals "aws" "oidc" {
