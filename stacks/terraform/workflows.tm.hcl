@@ -68,13 +68,16 @@ script "drift" "reconcile" {
   }
 }
 
-script "terraform" "show" {
+script "terraform" "render" {
   name        = "Terraform Show Plan"
   description = "Renders a Terraform Plan."
 
   job {
     commands = [
+      ["echo", "Stack: `${terramate.stack.path.absolute}`"],
+      ["echo", "```terraform"],
       ["terraform", "show", "-no-color", "out.tfplan"],
+      ["echo", "```"],
     ]
   }
 }

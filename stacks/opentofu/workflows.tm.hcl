@@ -68,16 +68,20 @@ script "drift" "reconcile" {
   }
 }
 
-script "tofu" "show" {
+script "tofu" "render" {
   name        = "OpenTofu Show Plan"
   description = "Renders a OpenTofu Plan."
 
   job {
     commands = [
+      ["echo", "Stack: `${terramate.stack.path.absolute}`"],
+      ["echo", "```terraform"],
       ["tofu", "show", "-no-color", "out.tfplan"],
+      ["echo", "```"],
     ]
   }
 }
+
 
 script "safe-guard" {
   job {
