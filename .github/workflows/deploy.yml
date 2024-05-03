@@ -38,11 +38,6 @@ jobs:
           asdf plugin add terraform
           asdf install terraform
 
-      - name: Install OpenTofu with asdf
-        run: |
-          asdf plugin add opentofu
-          asdf install opentofu
-
       ### Check for changed stacks
 
       - name: List changed stacks
@@ -74,7 +69,7 @@ jobs:
             -C stacks \
             --parallel 1 \
             --changed \
-            init
+            terraform init
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -86,7 +81,7 @@ jobs:
             -C stacks \
             --parallel 5 \
             --changed \
-            deploy
+            terraform deploy
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -97,6 +92,6 @@ jobs:
             -C stacks \
             --parallel 5 \
             --changed \
-            drift detect
+            terraform drift detect
         env:
           GITHUB_TOKEN: ${{ github.token }}
