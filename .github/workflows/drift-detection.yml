@@ -40,11 +40,6 @@ jobs:
           asdf plugin add terraform
           asdf install terraform
 
-      - name: Install OpenTofu with asdf
-        run: |
-          asdf plugin add opentofu
-          asdf install opentofu
-
       ### Configure cloud credentials
 
       - name: Configure AWS credentials
@@ -66,7 +61,7 @@ jobs:
           terramate script run \
             -C stacks \
             --parallel 1 \
-            init
+            terraform init
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -78,7 +73,7 @@ jobs:
             --parallel 5 \
             --continue-on-error \
             -- \
-            drift detect
+            terraform drift detect
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -92,6 +87,6 @@ jobs:
             --parallel 5 \
             --continue-on-error \
             -- \
-            drift reconcile
+            terraform drift reconcile
         env:
           GITHUB_TOKEN: ${{ github.token }}
