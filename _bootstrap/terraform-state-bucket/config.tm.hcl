@@ -35,7 +35,7 @@ generate_hcl "_main.tf" {
     }
 
     resource "aws_dynamodb_table" "terraform-lock" {
-      name           = tm_try(global.terraform.backend.dyanmodb_table, "terraform_state")
+      name           = tm_try(global.terraform.backend.dynamodb_table, "terraform-lock")
       read_capacity  = 5
       write_capacity = 5
       hash_key       = "LockID"

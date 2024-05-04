@@ -41,7 +41,7 @@ jobs:
       ### Install tooling
 
       - name: Install Terramate
-        uses: terramate-io/terramate-action@v1
+        uses: terramate-io/terramate-action@v2
 
       - name: Install asdf
         uses: asdf-vm/actions/setup@v3
@@ -50,6 +50,11 @@ jobs:
         run: |
           asdf plugin add terraform
           asdf install terraform
+
+      - name: Install OpenTofu with asdf
+        run: |
+          asdf plugin add opentofu
+          asdf install opentofu
 
       ### Linting
 
@@ -90,7 +95,7 @@ jobs:
             -C stacks \
             --changed \
             --parallel 1 \
-            terraform init
+            init
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -103,7 +108,7 @@ jobs:
             --parallel 5 \
             --continue-on-error \
             -- \
-            terraform preview
+            preview
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -115,7 +120,10 @@ jobs:
         run: |
           echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
           echo >>pr-comment.txt
-          echo >>pr-comment.txt "[:mag: View Details on Terramate Cloud](https://cloud.terramate.io/o/terramate-demo/review-requests)"
+          echo >>pr-comment.txt '> [!TIP]'
+          echo >>pr-comment.txt '> [:mag: View all Preview Details on Terramate Cloud](https://cloud.terramate.io/o/terramate-demo/review-requests)'
+          echo >>pr-comment.txt
+          terramate script run --changed safe-guard >>pr-comment.txt
           echo >>pr-comment.txt
           echo >>pr-comment.txt "### Changed Stacks"
           echo >>pr-comment.txt
@@ -123,12 +131,14 @@ jobs:
           echo >>pr-comment.txt "${{ steps.list-changed.outputs.stdout }}"
           echo >>pr-comment.txt '```'
           echo >>pr-comment.txt
-          echo >>pr-comment.txt "#### Terraform Plan"
+          echo >>pr-comment.txt "#### Terraform Plans"
           echo >>pr-comment.txt
-          echo >>pr-comment.txt '```terraform'
-          terramate run -C stacks --changed -- terraform show -no-color out.tfplan |& dd bs=1024 count=248 >>pr-comment.txt
+          terramate script run --changed -- terraform render | dd bs=1024 count=248 >>pr-comment.txt
           [ "${PIPESTATUS[0]}" == "141" ] && sed -i 's/#### Terraform Plan/#### :warning: Terraform Plan truncated: please check console output :warning:/' pr-comment.txt
-          echo >>pr-comment.txt '```'
+          echo >>pr-comment.txt "#### OpenTofu Plans"
+          echo >>pr-comment.txt
+          terramate script run --changed -- tofu render | dd bs=1024 count=248 >>pr-comment.txt
+          [ "${PIPESTATUS[0]}" == "141" ] && sed -i 's/#### OpenTofu Plan/#### :warning: OpenTofu Plan truncated: please check console output :warning:/' pr-comment.txt
           cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
 
       - name: Generate preview when no stacks changed
@@ -146,7 +156,10 @@ jobs:
         run: |
           echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
           echo >>pr-comment.txt
-          echo >>pr-comment.txt "[:mag: View Details on Terramate Cloud](https://cloud.terramate.io/o/terramate-demo/review-requests)"
+          echo >>pr-comment.txt '> [!TIP]'
+          echo >>pr-comment.txt '> [:mag: View all Preview Details on Terramate Cloud](https://cloud.terramate.io/o/terramate-demo/review-requests)'
+          echo >>pr-comment.txt
+          terramate script run --changed safe-guard >>pr-comment.txt
           echo >>pr-comment.txt
           echo >>pr-comment.txt "### Changed Stacks"
           echo >>pr-comment.txt
