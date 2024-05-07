@@ -26,7 +26,6 @@ generate_hcl "vpc.tf" {
 
       public_subnet_tags = {
         Tier = "public"
-        Bar  = "foo"
       }
 
       private_subnet_tags = {
