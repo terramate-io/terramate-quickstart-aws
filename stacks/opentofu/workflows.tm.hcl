@@ -60,10 +60,11 @@ script "drift" "reconcile" {
 
   job {
     commands = [
-      ["tofu", "plan", "-out", "drift.tfplan", "-detailed-exitcode", "-lock=false", {
-        sync_drift_status = true
-        tofu_plan_file    = "drift.tfplan"
+      ["tofu", "apply", "-input=false", "-auto-approve", "-lock-timeout=5m", "drift.tfplan", {
+        sync_deployment = true
+        tofu_plan_file  = "drift.tfplan"
       }],
+
     ]
   }
 }
