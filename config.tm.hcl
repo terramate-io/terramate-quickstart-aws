@@ -1,5 +1,5 @@
 globals "terraform" {
-  version = "1.7.5"
+  version = "1.8.2"
 }
 
 globals "terraform" "backend" {
@@ -17,7 +17,7 @@ globals "aws" "oidc" {
 globals "terraform" "providers" "aws" {
   enabled = true
   source  = "hashicorp/aws"
-  version = "~> 5.31"
+  version = "~> 5.48"
   config = {
     region = "us-east-1"
   }
