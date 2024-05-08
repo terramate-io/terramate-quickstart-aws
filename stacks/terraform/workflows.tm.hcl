@@ -60,10 +60,11 @@ script "drift" "reconcile" {
 
   job {
     commands = [
-      ["terraform", "plan", "-out", "drift.tfplan", "-detailed-exitcode", "-lock=false", {
-        sync_drift_status   = true
+      ["terraform", "apply", "-input=false", "-auto-approve", "-lock-timeout=5m", "drift.tfplan", {
+        sync_deployment     = true
         terraform_plan_file = "drift.tfplan"
       }],
+
     ]
   }
 }
