@@ -71,7 +71,7 @@ script "drift" "reconcile" {
 
 script "terraform" "render" {
   name        = "Terraform Show Plan"
-  description = "Render a Terraform Plan"
+  description = "Render a Terraform plan"
 
   job {
     commands = [
