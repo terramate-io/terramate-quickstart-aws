@@ -11,7 +11,7 @@ script "init" {
 
 script "preview" {
   name        = "OpenTofu Deployment Preview"
-  description = "Create a preview of OpenTofu Changes and synchronize it to Terramate Cloud."
+  description = "Create a preview of OpenTofu Changes and synchronize it to Terramate Cloud"
 
   job {
     commands = [
@@ -26,7 +26,7 @@ script "preview" {
 
 script "deploy" {
   name        = "OpenTofu Deployment"
-  description = "Run a full OpenTofu deployment cycle and synchronize the result to Terramate Cloud."
+  description = "Run a full OpenTofu deployment cycle and synchronize the result to Terramate Cloud"
 
   job {
     commands = [
@@ -42,7 +42,7 @@ script "deploy" {
 
 script "drift" "detect" {
   name        = "OpenTofu Drift Check"
-  description = "Detect drifts in OpenTofu configuration and synchronize it to Terramate Cloud."
+  description = "Detect drifts in OpenTofu configuration and synchronize it to Terramate Cloud"
 
   job {
     commands = [
@@ -56,7 +56,7 @@ script "drift" "detect" {
 
 script "drift" "reconcile" {
   name        = "OpenTofu Drift Reconciliation"
-  description = "Reconcile drifts in all changed stacks."
+  description = "Reconcile drifts in all changed stacks"
 
   job {
     commands = [
@@ -71,7 +71,7 @@ script "drift" "reconcile" {
 
 script "tofu" "render" {
   name        = "OpenTofu Show Plan"
-  description = "Render an OpenTofu Plan."
+  description = "Render an OpenTofu Plan"
 
   job {
     commands = [
