@@ -1,6 +1,6 @@
 script "init" {
   name        = "OpenTofu Init"
-  description = "Downloads the required provider plugins and modules and setting up the backend"
+  description = "Download the required provider plugins and modules and set up the backend"
 
   job {
     commands = [
@@ -56,7 +56,7 @@ script "drift" "detect" {
 
 script "drift" "reconcile" {
   name        = "OpenTofu Drift Reconciliation"
-  description = "Reconciles drifts in all changed stacks."
+  description = "Reconcile drifts in all changed stacks."
 
   job {
     commands = [
@@ -71,7 +71,7 @@ script "drift" "reconcile" {
 
 script "tofu" "render" {
   name        = "OpenTofu Show Plan"
-  description = "Renders a OpenTofu Plan."
+  description = "Render an OpenTofu Plan."
 
   job {
     commands = [
