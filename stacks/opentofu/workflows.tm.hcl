@@ -71,7 +71,7 @@ script "drift" "reconcile" {
 
 script "tofu" "render" {
   name        = "OpenTofu Show Plan"
-  description = "Render an OpenTofu Plan"
+  description = "Render an OpenTofu plan"
 
   job {
     commands = [
