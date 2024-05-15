@@ -11,7 +11,7 @@ script "init" {
 
 script "preview" {
   name        = "OpenTofu Deployment Preview"
-  description = "Create a preview of OpenTofu Changes and synchronize it to Terramate Cloud"
+  description = "Create a preview of OpenTofu changes and synchronize it to Terramate Cloud"
 
   job {
     commands = [
