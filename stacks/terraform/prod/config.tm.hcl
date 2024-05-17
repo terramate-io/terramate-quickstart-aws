@@ -12,7 +12,7 @@ globals "vpc" {
 }
 
 globals "ecs" {
-  cluster_name = "prd-ecs-cluster"
+  cluster_name = "prd-ecs-clusters2"
 }
 
 globals "alb" {

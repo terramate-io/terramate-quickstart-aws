@@ -1,7 +1,7 @@
 // TERRAMATE: GENERATED AUTOMATICALLY DO NOT EDIT
 
 module "ecs_cluster" {
-  cluster_name = "prd-ecs-cluster"
+  cluster_name = "prd-ecs-clusters2"
   fargate_capacity_providers = {
     FARGATE = {
       default_capacity_provider_strategy = {

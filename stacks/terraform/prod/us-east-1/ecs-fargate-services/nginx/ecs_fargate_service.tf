@@ -3,7 +3,7 @@
 resource "null_resource" "initial_deployment_trigger" {
 }
 data "aws_ecs_cluster" "ecs_cluster" {
-  cluster_name = "prd-ecs-cluster"
+  cluster_name = "prd-ecs-clusters2"
   depends_on = [
     null_resource.initial_deployment_trigger,
   ]
