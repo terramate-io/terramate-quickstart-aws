@@ -31,7 +31,7 @@ resource "aws_dynamodb_table" "terraform-lock" {
   name          = "terraform-lock"
   read_capacity = 5
   tags = {
-    "Name" = "DynamoDB Terraform State Lock Table"
+    Name = "DynamoDB Terraform State Lock Table"
   }
   write_capacity = 5
   attribute {

@@ -43,16 +43,16 @@ data "aws_security_group" "security_group" {
 module "ecs_service" {
   cluster_arn = data.aws_ecs_cluster.ecs_cluster.arn
   container_definitions = {
-    ("nginx") = {
+    nginx = {
       cpu       = 256
-      memory    = 512
       essential = true
       image     = "public.ecr.aws/nginx/nginx:1.25-bookworm"
+      memory    = 512
       port_mappings = [
         {
-          name          = "nginx"
           containerPort = 80
           hostPort      = 80
+          name          = "nginx"
           protocol      = "tcp"
         },
       ]

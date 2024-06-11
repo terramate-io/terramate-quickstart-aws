@@ -26,27 +26,27 @@ module "alb" {
   enable_deletion_protection = false
   listeners = {
     ex_http = {
-      port     = 80
-      protocol = "HTTP"
       forward = {
         target_group_key = "ex_ecs"
       }
+      port     = 80
+      protocol = "HTTP"
     }
   }
   load_balancer_type = "application"
   name               = "production-alb"
   security_group_egress_rules = {
     all = {
-      ip_protocol = "-1"
       cidr_ipv4   = "10.0.0.0/16"
+      ip_protocol = "-1"
     }
   }
   security_group_ingress_rules = {
     all_http = {
-      from_port   = 80
-      to_port     = 80
-      ip_protocol = "tcp"
       cidr_ipv4   = "0.0.0.0/0"
+      from_port   = 80
+      ip_protocol = "tcp"
+      to_port     = 80
     }
   }
   source  = "terraform-aws-modules/alb/aws"
@@ -57,11 +57,10 @@ module "alb" {
   }
   target_groups = {
     ex_ecs = {
-      backend_protocol                  = "HTTP"
-      backend_port                      = 80
-      target_type                       = "ip"
-      deregistration_delay              = 5
-      load_balancing_cross_zone_enabled = true
+      backend_port         = 80
+      backend_protocol     = "HTTP"
+      create_attachment    = false
+      deregistration_delay = 5
       health_check = {
         enabled             = true
         healthy_threshold   = 5
@@ -73,7 +72,8 @@ module "alb" {
         timeout             = 5
         unhealthy_threshold = 2
       }
-      create_attachment = false
+      load_balancing_cross_zone_enabled = true
+      target_type                       = "ip"
     }
   }
   version = "9.9.0"
