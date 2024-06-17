@@ -1,6 +1,6 @@
 terramate {
-  required_version                   = ">= 0.8.4"
-  required_version_allow_prereleases = true
+  required_version = ">= 0.9.0"
+  # required_version_allow_prereleases = true
   config {
 
     # Configure the namespace of your Terramate Cloud organization
