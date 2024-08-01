@@ -85,6 +85,8 @@ script "tofu" "render" {
 
 
 script "safe-guard" {
+  description = "Safe-guard the workflow"
+
   job {
     command = ["true"]
   }
