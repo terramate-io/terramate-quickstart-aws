@@ -44,3 +44,4 @@ pr-comment.txt
 .tf_plugin_cache_dir
 
 preview_url.txt
+stacks/terraform/use-vpc-output-example/vpc_id.txt
