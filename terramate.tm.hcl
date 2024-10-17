@@ -1,6 +1,6 @@
 terramate {
-  required_version = ">= 0.9.0"
-  # required_version_allow_prereleases = true
+  required_version                   = ">= 0.9.0"
+  required_version_allow_prereleases = true
   config {
 
     # Optionally disable safe guards
@@ -31,6 +31,7 @@ terramate {
     # Enable Terramate Scripts
     experiments = [
       "scripts",
+      "sharing-is-caring",
     ]
   }
 }
