@@ -1,5 +1,5 @@
 terramate {
-  required_version = ">= 0.9.0"
+  required_version = ">= 0.11.1"
   # required_version_allow_prereleases = true
   config {
 
