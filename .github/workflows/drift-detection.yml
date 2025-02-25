@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # Run this workflow at the top of every hour
-    - cron: "0 * * * *"
+    - cron: "0 */12 * * *"
 
 jobs:
   drift-detection:
@@ -34,6 +34,8 @@ jobs:
 
       - name: Install asdf
         uses: asdf-vm/actions/setup@v3
+        with:
+          asdf_branch: v0.15.0
 
       - name: Install Terraform with asdf
         run: |
