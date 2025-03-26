@@ -15,6 +15,7 @@ terramate {
     # Configure the namespace of your Terramate Cloud organization
     cloud {
       organization = "terramate-demo"
+      location     = "eu"
     }
 
     git {
@@ -31,6 +32,7 @@ terramate {
     # Enable Terramate Scripts
     experiments = [
       "scripts",
+      "tmgen",
     ]
   }
 }

@@ -1,0 +1,17 @@
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws" ## Replace with relative path to local module (suggested by Soeren)
+  version = tm_try(global.terraform.modules.vpc.version, "5.19.0")
+
+  name = "vpc-${global.terraform.env}"
+
+  cidr               = "10.0.0.0/16"
+  azs                = ["us-east-1a", "us-east-1b"]
+  private_subnets    = ["10.0.0.0/22", "10.0.4.0/22"]
+  public_subnets     = ["10.0.8.0/22", "10.0.12.0/22"]
+  enable_nat_gateway = true
+
+  tags = {
+    Name        = "vpc-${global.terraform.env}"
+    Environment = global.terraform.env
+  }
+}
