@@ -1,0 +1,17 @@
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = tm_try(global.terraform.modules.vpc.version, "5.19.0")
+
+  name = "vpc-${global.terraform.env}"
+
+  cidr               = "10.1.0.0/16"
+  azs                = ["us-east-1a", "us-east-1b"]
+  private_subnets    = ["10.1.0.0/22", "10.1.4.0/22"]
+  public_subnets     = ["10.1.8.0/22", "10.1.12.0/22"]
+  enable_nat_gateway = true
+
+  tags = {
+    Name        = "vpc-${global.terraform.env}"
+    Environment = global.terraform.env
+  }
+}

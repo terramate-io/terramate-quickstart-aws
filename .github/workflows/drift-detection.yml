@@ -18,6 +18,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      # Let other stacks finish even if one fails.
+      fail-fast: false
+      matrix:
+        include:
+          - account_id: 381492264542
+            env: stg
+          - account_id: 955425229529
+            env: prd
+
     steps:
       ### Check out the code
 
@@ -53,7 +63,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/github
+          role-to-assume: arn:aws:iam::${{ matrix.account_id }}:role/github
         env:
           AWS_REGION: us-east-1
           AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
@@ -66,7 +76,7 @@ jobs:
       - name: Run Terraform init in all stacks
         run: |
           terramate script run \
-            -C stacks \
+            -C stacks/terraform/envs/${{ matrix.env }} \
             --parallel 1 \
             init
         env:
@@ -76,7 +86,7 @@ jobs:
         id: drift-detect
         run: |
           terramate script run \
-            -C stacks \
+            -C stacks/terraform/envs/${{ matrix.env }} \
             --parallel 5 \
             --continue-on-error \
             -- \
@@ -88,7 +98,7 @@ jobs:
         id: drift-reconcile
         run: |
           terramate script run \
-            -C stacks \
+            -C stacks/terraform/envs/${{ matrix.env }} \
             --tags reconcile \
             --status=drifted \
             --parallel 5 \
