@@ -17,6 +17,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      # Let other stacks finish even if one fails.
+      fail-fast: false
+      matrix:
+        include:
+          - account_id: 381492264542
+            env: stg
+          - account_id: 955425229529
+            env: prd
+
     steps:
       ### Check out the code
 
@@ -49,7 +59,7 @@ jobs:
 
       - name: List changed stacks
         id: list-changed
-        run: terramate list -C stacks --changed
+        run: terramate list -C stacks/terraform/envs/${{ matrix.env }} --changed
 
       ### Configure cloud credentials
 
@@ -58,7 +68,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/github
+          role-to-assume: arn:aws:iam::${{ matrix.account_id }}:role/github
         env:
           AWS_REGION: us-east-1
           AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
@@ -73,7 +83,7 @@ jobs:
         if: steps.list-changed.outputs.stdout
         run: |
           terramate script run \
-            -C stacks \
+            -C stacks/terraform/envs/${{ matrix.env }} \
             --parallel 1 \
             --changed \
             init
@@ -85,7 +95,7 @@ jobs:
         if: steps.list-changed.outputs.stdout
         run: |
           terramate script run \
-            -C stacks \
+            -C stacks/terraform/envs/${{ matrix.env }} \
             --parallel 5 \
             --changed \
             deploy
@@ -96,7 +106,7 @@ jobs:
         if: steps.list-changed.outputs.stdout && ! cancelled() && steps.deploy.outcome != 'skipped'
         run: |
           terramate script run \
-            -C stacks \
+            -C stacks/terraform/envs/${{ matrix.env }} \
             --parallel 5 \
             --changed \
             drift detect

@@ -1,0 +1,4 @@
+locals {
+  vpc_id     = data.aws_vpc.vpc.id
+  subnet_ids = data.aws_subnets.subnets.ids
+}
