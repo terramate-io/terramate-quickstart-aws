@@ -4,11 +4,11 @@ generate_hcl "backend.tf" {
   content {
     terraform {
       backend "s3" {
-        region         = global.terraform.backend.region
-        bucket         = global.terraform.backend.bucket
-        key            = tm_try(global.terraform.backend.key, "terraform/stacks/by-id/${terramate.stack.id}/terraform.tfstate")
-        encrypt        = true
-        dynamodb_table = tm_try(global.terraform.backend.dynamodb_table, "terraform-lock")
+        region       = global.terraform.backend.region
+        bucket       = global.terraform.backend.bucket
+        key          = tm_try(global.terraform.backend.key, "terraform/stacks/by-id/${terramate.stack.id}/terraform.tfstate")
+        encrypt      = true
+        use_lockfile = true
       }
     }
   }
