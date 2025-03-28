@@ -22,3 +22,9 @@ globals "terraform" "providers" "aws" {
     region = "us-east-1"
   }
 }
+
+globals "terraform" "providers" "kubernetes" {
+  enabled = tm_contains(terramate.stack.tags, "kubernetes")
+  source  = "hashicorp/kubernetes"
+  version = "~> 2.36.0"
+}

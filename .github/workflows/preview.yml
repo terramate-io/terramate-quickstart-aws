@@ -21,10 +21,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - account_id: 381492264542
-            env: stg
-          - account_id: 955425229529
-            env: prd
+          - env: stg
+            account_id: 381492264542
+          - env: prd
+            account_id: 955425229529
     
     steps:
       ### Check out the code

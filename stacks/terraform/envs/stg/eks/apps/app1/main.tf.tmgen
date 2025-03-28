@@ -1,0 +1,62 @@
+resource "kubernetes_deployment" "app1" {
+  metadata {
+    name      = "app1-${global.terraform.env}"
+    namespace = "app-${global.terraform.env}"
+  }
+  spec {
+    replicas = 1
+    selector {
+      match_labels = {
+        app = "app1-${global.terraform.env}"
+      }
+    }
+    template {
+      metadata {
+        labels = {
+          app = "app1-${global.terraform.env}"
+        }
+      }
+      spec {
+        container {
+          image = "gcr.io/cloudrun/hello:latest"
+          name  = "hello"
+          port {
+            container_port = 8080
+          }
+          security_context {
+            run_as_non_root           = true
+            read_only_root_filesystem = true
+          }
+          resources {
+            requests = {
+              cpu    = "50m"
+              memory = "100Mi"
+            }
+            limits = {
+              cpu    = "50m"
+              memory = "100Mi"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_service" "app1" {
+  metadata {
+    name      = "app1-${global.terraform.env}"
+    namespace = "app-${global.terraform.env}"
+  }
+  spec {
+    type = "LoadBalancer"
+    port {
+      port        = 8080
+      protocol    = "TCP"
+      target_port = 8080
+    }
+    selector = {
+      app = "app1-${global.terraform.env}"
+    }
+  }
+}
