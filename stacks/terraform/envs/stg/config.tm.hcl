@@ -1,0 +1,3 @@
+globals "terraform" {
+  env = "stg"
+}
