@@ -23,10 +23,6 @@ resource "kubernetes_deployment" "app1" {
           port {
             container_port = 8080
           }
-          security_context {
-            run_as_non_root           = true
-            read_only_root_filesystem = true
-          }
           resources {
             requests = {
               cpu    = "50m"
