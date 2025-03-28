@@ -10,7 +10,14 @@ module "eks" {
   vpc_id     = local.vpc_id
   subnet_ids = local.subnet_ids
 
+  cluster_compute_config = {
+    enabled    = true
+    node_pools = ["general-purpose"]
+  }
+
   tags = {
     Environment = global.terraform.env
   }
+
+  enable_cluster_creator_admin_permissions = true
 }
