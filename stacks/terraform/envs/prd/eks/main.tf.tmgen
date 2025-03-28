@@ -1,23 +1,23 @@
-#module "eks" {
-#  source  = "terraform-aws-modules/eks/aws"
-#  version = "20.34.0"
-#
-#  cluster_name    = "cluster-${global.terraform.env}"
-#  cluster_version = "1.32"
-#
-#  cluster_endpoint_public_access = true
-#
-#  vpc_id     = local.vpc_id
-#  subnet_ids = local.subnet_ids
-#
-#  cluster_compute_config = {
-#    enabled    = true
-#    node_pools = ["general-purpose"]
-#  }
-#
-#  tags = {
-#    Environment = global.terraform.env
-#  }
-#
-#  enable_cluster_creator_admin_permissions = true
-#}
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "20.34.0"
+
+  cluster_name    = "cluster-${global.terraform.env}"
+  cluster_version = "1.32"
+
+  cluster_endpoint_public_access = true
+
+  vpc_id     = local.vpc_id
+  subnet_ids = local.subnet_ids
+
+  cluster_compute_config = {
+    enabled    = true
+    node_pools = ["general-purpose"]
+  }
+
+  tags = {
+    Environment = global.terraform.env
+  }
+
+  enable_cluster_creator_admin_permissions = true
+}
