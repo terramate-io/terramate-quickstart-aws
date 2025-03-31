@@ -16,6 +16,6 @@ module "eks" {
   tags = {
     Environment = "prd"
   }
-  version = "20.34.0"
+  version = "20.35.0"
   vpc_id  = local.vpc_id
 }

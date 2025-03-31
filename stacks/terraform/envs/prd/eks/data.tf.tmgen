@@ -3,7 +3,7 @@ resource "null_resource" "initial_trigger" {}
 data "aws_vpc" "vpc" {
   filter {
     name   = "tag:Name"
-    values = ["vpc-${global.terraform.env}"]
+    values = [global.vpc.vpc_name]
   }
   depends_on = [null_resource.initial_trigger]
 }
