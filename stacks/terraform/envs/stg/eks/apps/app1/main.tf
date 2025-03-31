@@ -40,3 +40,20 @@ resource "kubernetes_deployment" "app1" {
     }
   }
 }
+resource "kubernetes_service" "app1" {
+  metadata {
+    name      = "app1-stg"
+    namespace = "app-stg"
+  }
+  spec {
+    selector = {
+      app = "app1-stg"
+    }
+    type = "LoadBalancer"
+    port {
+      port        = 8080
+      protocol    = "TCP"
+      target_port = 8080
+    }
+  }
+}
