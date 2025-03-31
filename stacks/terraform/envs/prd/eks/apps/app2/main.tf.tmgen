@@ -18,7 +18,7 @@ resource "kubernetes_deployment" "app2" {
       }
       spec {
         container {
-          image = "gcr.io/kubernetes-e2e-test-images/echoserver:latest"
+          image = "gcr.io/kubernetes-e2e-test-images/echoserver:2.2"
           name  = "echoserver"
           port {
             container_port = 8080
