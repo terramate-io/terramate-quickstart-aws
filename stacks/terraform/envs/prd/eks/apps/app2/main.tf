@@ -1,27 +1,27 @@
 // TERRAMATE: GENERATED AUTOMATICALLY DO NOT EDIT
 
-resource "kubernetes_deployment" "app1" {
+resource "kubernetes_deployment" "app2" {
   metadata {
-    name      = "app1-prd"
+    name      = "app2-prd"
     namespace = "app-prd"
   }
   spec {
     replicas = 1
     selector {
       match_labels = {
-        app = "app1-prd"
+        app = "app2-prd"
       }
     }
     template {
       metadata {
         labels = {
-          app = "app1-prd"
+          app = "app2-prd"
         }
       }
       spec {
         container {
-          image = "gcr.io/cloudrun/hello:latest"
-          name  = "hello"
+          image = "gcr.io/kubernetes-e2e-test-images/echoserver:latest"
+          name  = "echoserver"
           port {
             container_port = 8080
           }
