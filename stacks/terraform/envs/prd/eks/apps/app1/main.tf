@@ -40,3 +40,20 @@ resource "kubernetes_deployment" "app1" {
     }
   }
 }
+resource "kubernetes_service" "app1" {
+  metadata {
+    name      = "app1-prd"
+    namespace = "app-prd"
+  }
+  spec {
+    selector = {
+      app = "app1-prd"
+    }
+    type = "NodePort"
+    port {
+      port        = 8080
+      protocol    = "TCP"
+      target_port = 8080
+    }
+  }
+}
