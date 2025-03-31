@@ -3,6 +3,7 @@ globals "terraform" {
 }
 
 globals "vpc" {
+  vpc_name        = "vpc-${global.terraform.env}"
   cidr            = "10.1.0.0/16"
   azs             = ["us-east-1a", "us-east-1b"]
   private_subnets = ["10.1.0.0/22", "10.1.4.0/22"]

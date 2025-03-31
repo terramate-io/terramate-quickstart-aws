@@ -1,8 +1,8 @@
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = tm_try(global.terraform.modules.vpc.version, "5.19.0")
+  version = "5.19.0"
 
-  name = "vpc-${global.terraform.env}"
+  name = global.vpc.vpc_name
 
   cidr               = global.vpc.cidr
   azs                = global.vpc.azs
@@ -11,7 +11,7 @@ module "vpc" {
   enable_nat_gateway = true
 
   tags = {
-    Name        = "vpc-${global.terraform.env}"
+    Name        = global.vpc.vpc_name
     Environment = global.terraform.env
   }
 }

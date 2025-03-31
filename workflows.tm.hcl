@@ -10,11 +10,3 @@ script "safe-guard" {
     ]
   }
 }
-
-script "promote" {
-  name = "Promote staging to production"
-  job {
-    command = ["true"] ## TODO
-    ## this runs from staging only and always promotes to prod
-  }
-}
