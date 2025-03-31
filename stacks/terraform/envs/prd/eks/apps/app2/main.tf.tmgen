@@ -38,3 +38,21 @@ resource "kubernetes_deployment" "app2" {
     }
   }
 }
+
+resource "kubernetes_service" "app2" {
+  metadata {
+    name      = "app2-${global.terraform.env}"
+    namespace = "app-${global.terraform.env}"
+  }
+  spec {
+    type = "NodePort"
+    port {
+      port        = 8080
+      protocol    = "TCP"
+      target_port = 8080
+    }
+    selector = {
+      app = "app2-${global.terraform.env}"
+    }
+  }
+}

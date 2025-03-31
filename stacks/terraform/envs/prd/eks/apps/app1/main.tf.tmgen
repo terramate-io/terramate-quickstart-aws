@@ -39,20 +39,20 @@ resource "kubernetes_deployment" "app1" {
   }
 }
 
-# resource "kubernetes_service" "app1" {
-#   metadata {
-#     name      = "app1-${global.terraform.env}"
-#     namespace = "app-${global.terraform.env}"
-#   }
-#   spec {
-#     type = "LoadBalancer"
-#     port {
-#       port        = 8080
-#       protocol    = "TCP"
-#       target_port = 8080
-#     }
-#     selector = {
-#       app = "app1-${global.terraform.env}"
-#     }
-#   }
-# }
+resource "kubernetes_service" "app1" {
+  metadata {
+    name      = "app1-${global.terraform.env}"
+    namespace = "app-${global.terraform.env}"
+  }
+  spec {
+    type = "NodePort"
+    port {
+      port        = 8080
+      protocol    = "TCP"
+      target_port = 8080
+    }
+    selector = {
+      app = "app1-${global.terraform.env}"
+    }
+  }
+}
