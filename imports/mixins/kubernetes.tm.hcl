@@ -3,11 +3,11 @@ generate_hcl "kubernetes.tf" {
 
   content {
     data "aws_eks_cluster" "cluster" {
-      name = local.cluster_name
+      name = global.eks.cluster_name
     }
 
     data "aws_eks_cluster_auth" "cluster_auth" {
-      name = local.cluster_name
+      name = global.eks.cluster_name
     }
 
     provider "kubernetes" {

@@ -14,3 +14,8 @@ data "aws_subnets" "subnets" {
     values = [data.aws_vpc.vpc.id]
   }
 }
+
+locals {
+  vpc_id     = data.aws_vpc.vpc.id
+  subnet_ids = data.aws_subnets.subnets.ids
+}
