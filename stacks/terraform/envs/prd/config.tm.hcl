@@ -8,3 +8,9 @@ globals "vpc" {
   private_subnets = ["10.1.0.0/22", "10.1.4.0/22"]
   public_subnets  = ["10.1.8.0/22", "10.1.12.0/22"]
 }
+
+globals "eks" {
+  vpc_name        = "vpc-${global.terraform.env}"
+  cluster_name    = "cluster-${global.terraform.env}"
+  cluster_version = "1.32"
+}

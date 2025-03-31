@@ -49,9 +49,9 @@ resource "kubernetes_service" "app2" {
     selector = {
       app = "app2-prd"
     }
-    type = "NodePort"
+    type = "LoadBalancer"
     port {
-      port        = 8080
+      port        = 80
       protocol    = "TCP"
       target_port = 8080
     }
