@@ -1,0 +1,3 @@
+locals {
+  cluster_name = "cluster-${global.terraform.env}"
+}
