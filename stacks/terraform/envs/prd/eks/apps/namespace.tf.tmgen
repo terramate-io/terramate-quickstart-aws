@@ -1,8 +1,8 @@
 resource "kubernetes_namespace" "namespace" {
   metadata {
-    name = "app-${global.terraform.env}"
+    name = global.eks.namespace
     annotations = {
-      name = "app-${global.terraform.env}"
+      name = global.eks.namespace
     }
     labels = {
       "pod-security.kubernetes.io/enforce" = "baseline"

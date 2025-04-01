@@ -1,21 +1,24 @@
 // TERRAMATE: GENERATED AUTOMATICALLY DO NOT EDIT
 
+locals {
+  app_name = "app1-prd"
+}
 resource "kubernetes_deployment" "app1" {
   metadata {
-    name      = "app1-prd"
+    name      = local.app_name
     namespace = "app-prd"
   }
   spec {
     replicas = 1
     selector {
       match_labels = {
-        app = "app1-prd"
+        app = local.app_name
       }
     }
     template {
       metadata {
         labels = {
-          app = "app1-prd"
+          app = local.app_name
         }
       }
       spec {
@@ -42,12 +45,12 @@ resource "kubernetes_deployment" "app1" {
 }
 resource "kubernetes_service" "app1" {
   metadata {
-    name      = "app1-prd"
+    name      = local.app_name
     namespace = "app-prd"
   }
   spec {
     selector = {
-      app = "app1-prd"
+      app = local.app_name
     }
     type = "LoadBalancer"
     port {
@@ -56,4 +59,7 @@ resource "kubernetes_service" "app1" {
       target_port = 8080
     }
   }
+}
+output "app_url" {
+  value = kubernetes_service.app1.status[0].load_balancer[0].ingress[0].hostname
 }
