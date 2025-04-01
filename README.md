@@ -30,13 +30,42 @@ Terramate orchestration and change detection.
 
 ### Features
 
-- **GitOps for Terraform with GitHub Actions**: Pre-configured GitHub Action GitOps workflows using merge-and-apply strategy.
-- **Recommended Project Structure**: Best practice project structure to get up and running in no time.
+- **GitOps for Terraform with GitHub Actions**: Pre-configured GitHub Action GitOps workflows using merge-and-apply strategy with drift detection and reconciliation.
+- **Recommended Project Structure**: Best practice project structure with environment-based organization (stg, prd).
 - **Change Preview in Pull Requests**: Preview and approval of plans in Pull Requests to review and approve changes before deploying.
 - **DRY Terraform Stacks**: Generate Terraform provider and backend configuration in stacks.
 - **OpenID Connect (OIDC)**: Allows GitHub Actions workflows to access AWS resources without storing long-lived GitHub secrets.
 - **Terraform S3 Remote State Backend**: Terraform Remote State Storage and State Locking with AWS S3 and DynamoDB.
 - **Terramate Cloud Integration**: Pushes data to Terramate Cloud for observability, asset management, drift management, and Slack notifications.
+- **Multi-Environment Support**: Built-in support for staging and production environments with separate AWS accounts.
+- **Drift Detection and Reconciliation**: Automated drift detection and reconciliation workflows to maintain infrastructure consistency.
+
+### AWS Architecture
+
+This template creates a complete AWS infrastructure with the following components:
+
+1. **VPC (Virtual Private Cloud)**
+   - A dedicated network space for your infrastructure
+   - Public and private subnets across multiple availability zones
+   - NAT Gateway for outbound internet access from private subnets
+   - Internet Gateway for inbound internet access to public subnets
+
+2. **EKS (Elastic Kubernetes Service)**
+   - A managed Kubernetes cluster in auto-mode
+   - Node groups for running your containerized applications
+   - Auto-scaling capabilities based on workload demand
+   - Integration with AWS IAM for authentication and authorization
+
+3. **Sample Applications**
+   - Two sample web applications deployed in the EKS cluster
+   - Applications are accessible via Load Balancer services
+   - Demonstrates best practices for Kubernetes deployments
+
+The infrastructure is designed to be:
+- Highly available across multiple availability zones
+- Secure with proper network isolation
+- Scalable to meet growing demands
+- Easy to maintain with clear separation of concerns
 
 ## How do you use this repository?
 
@@ -51,11 +80,12 @@ Ensure you have the following prerequisites set up by running the commands below
 
 1. Install asdf: Follow the [official guide](https://asdf-vm.com/guide/getting-started.html).
 
-2. Install required `asdf` plugins for Terramate and Terraform:
+2. Install required `asdf` plugins for Terramate, Terraform, and OpenTofu:
   
     ```bash
     asdf plugin add terramate && \
     asdf plugin add terraform && \
+    asdf plugin add opentofu && \
     asdf plugin add pre-commit && \
     asdf install
      ```
@@ -64,7 +94,7 @@ Ensure you have the following prerequisites set up by running the commands below
 credentials using one of the supported [authentication mechanisms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication-and-configuration).
 (We recommend you use [aws-vault](https://github.com/99designs/aws-vault) for secure authentication.)
 
-3. *(Optional)* Install [pre-commit](https://pre-commit.com/) hooks
+4. *(Optional)* Install [pre-commit](https://pre-commit.com/) hooks
 
 We recommend installing the pre-commit hooks in this repository to enable a seamless development flow. The hooks guarantee
 that your Terramate and Terraform code is always up-to-date and well-formatted when committing changes to the repository.
@@ -72,6 +102,58 @@ that your Terramate and Terraform code is always up-to-date and well-formatted w
 ```sh
 pre-commit install
 ```
+
+### Project Structure
+
+The project is organized into the following main directories:
+
+- `stacks/terraform/`: Contains all Terraform stacks
+  - `envs/`: Environment-specific configurations
+    - `stg/`: Staging environment
+      - `config.tm.hcl`: Environment-specific configuration for all sub-stacks
+      - `vpc/`: Network infrastructure stack
+        - `main.tf`: VPC, subnets, and networking components
+      - `eks/`: Kubernetes cluster stack
+        - `main.tf`: EKS cluster and node groups
+        - `apps/`: Application deployments (with namespace definition)
+          - `app1/`: First application stack
+          - `app2/`: Second application stack
+    - `prd/`: Production environment (similar structure to stg)
+  - `workflows.tm.hcl`: Reusable Terramate scripts for common operations
+
+The stacks are designed to be deployed in a specific order using Terramate's stack ordering capabilities. This allows you to:
+- Deploy infrastructure components (VPC then EKS cluster) first
+- Create namespaces
+- Deploy applications in the correct order
+- All while maintaining a single state file per stack
+
+This approach enables you to:
+- Deploy multiple related resources in a single PR
+- Maintain clear dependencies between resources
+- Keep your infrastructure code organized and modular
+- Reduce the number of PRs needed for related changes
+
+### Promoting Changes from Staging to Production
+
+After testing changes in the staging environment, you can promote them to production using the `promote` Terramate script. This script is designed to help you safely propagate changes from staging to production.
+
+To use the promote script:
+
+1. Navigate to the staging environment directory:
+   ```bash
+   cd stacks/terraform/envs/stg
+   ```
+
+2. Run the promote script:
+   ```bash
+   terramate script run promote
+   ```
+
+> **Note**: The promote script is only available when executed from within the staging environment directory. If you try to run it from any other location, it will print a warning message and exit.
+
+The promote script will:
+- Compare the changes between staging and production and sync any differences (including deleting files)
+- Run `terramate generate` to make sure any config differences are applied correctly
 
 ### Configure Terraform State Bucket and Workload Identity Provider
 
@@ -139,12 +221,50 @@ This command will move the state of deployed stacks to the S3 bucket.
 
 #### Create a new Organization
 
+1. Visit [Terramate Cloud](https://app.terramate.io)
+2. Sign up for a new account or log in
+3. Create a new organization
+4. Follow the setup wizard to configure your organization
+
 #### Configure Slack Notifications
 
+1. In Terramate Cloud, navigate to your organization settings
+2. Go to the "Integrations" section
+3. Add a new Slack integration
 
-#### To Do
+### Available Terramate Scripts
+
+The project includes several pre-configured Terramate scripts in `stacks/terraform/workflows.tm.hcl` (see [Terramate Scripts Documentation](https://terramate.io/docs/cli/scripts/)):
+
+- `init`: Initialize Terraform
+- `preview`: Create a preview of changes and sync to Terramate Cloud
+- `deploy`: Run a full deployment cycle and sync results to Terramate Cloud
+- `drift detect`: Check for infrastructure drift and sync results to Terramate Cloud
+- `drift reconcile`: Optionally reconcile detected drift
+- `terraform render`: Render Terraform plan output
+
+### GitHub Actions Workflows
+
+The repository includes three main GitHub Actions workflows. All workflows support multiple environments (stg, prd) using a workflow matrix.
+
+1. **Preview Workflow** (`preview.yml`):
+   - Runs on pull requests
+   - Performs Terraform validation and planning
+   - Syncs preview results to Terramate Cloud
+
+2. **Deploy Workflow** (`deploy.yml`):
+   - Runs on merges to the main branch
+   - Applies approved changes
+   - Syncs deployment results to Terramate Cloud
+
+3. **Drift Detection Workflow** (`drift-detection.yml`):
+   - Runs on a schedule
+   - Detects infrastructure drift
+   - Creates pull requests for drift reconciliation
+   - Sends notifications via Slack
+
+### To Do
 
 - Policies with OPA and/or Sentinel
 - Implement checkov, trivy, terrascan
 - Implement infracost
-- Configure pre-commit hook
