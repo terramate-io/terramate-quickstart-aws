@@ -12,7 +12,7 @@ globals "vpc" {
 
 globals "eks" {
   vpc_name        = "vpc-${global.terraform.env}"
-  cluster_name    = "cluster-${global.terraform.env}"
+  cluster_name    = "cluster-${global.terraform.env}2"
   cluster_version = "1.32"
   namespace       = "app-${global.terraform.env}"
 }

@@ -8,7 +8,7 @@ module "eks" {
     ]
   }
   cluster_endpoint_public_access           = true
-  cluster_name                             = "cluster-stg"
+  cluster_name                             = "cluster-stg2"
   cluster_version                          = "1.32"
   enable_cluster_creator_admin_permissions = true
   source                                   = "terraform-aws-modules/eks/aws"
