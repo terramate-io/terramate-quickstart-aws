@@ -42,6 +42,11 @@ resource "kubernetes_deployment" "app1" {
       }
     }
   }
+  timeouts {
+    create = "3m"
+    delete = "3m"
+    update = "3m"
+  }
 }
 resource "kubernetes_service" "app1" {
   metadata {
@@ -58,6 +63,9 @@ resource "kubernetes_service" "app1" {
       protocol    = "TCP"
       target_port = 8080
     }
+  }
+  timeouts {
+    create = "3m"
   }
 }
 output "app_url" {

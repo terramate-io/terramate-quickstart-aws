@@ -42,6 +42,11 @@ resource "kubernetes_deployment" "app2" {
       }
     }
   }
+  timeouts {
+    create = "3m"
+    delete = "3m"
+    update = "3m"
+  }
 }
 resource "kubernetes_service" "app2" {
   metadata {
@@ -52,11 +57,14 @@ resource "kubernetes_service" "app2" {
     selector = {
       app = local.app_name
     }
-    type = "NodePort"
+    type = "LoadBalancer"
     port {
       port        = 80
       protocol    = "TCP"
       target_port = 8080
     }
+  }
+  timeouts {
+    create = "3m"
   }
 }
