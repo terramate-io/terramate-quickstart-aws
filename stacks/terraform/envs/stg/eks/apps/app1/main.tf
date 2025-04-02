@@ -60,3 +60,6 @@ resource "kubernetes_service" "app1" {
     }
   }
 }
+output "app_url" {
+  value = "http://${kubernetes_service.app1.status[0].load_balancer[0].ingress[0].hostname}"
+}
