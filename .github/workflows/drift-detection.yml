@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # Run this workflow at the top of every hour
-    - cron: "0 */12 * * *"
+    - cron: "0 9-20 * * 1-5"
 
 jobs:
   drift-detection:
