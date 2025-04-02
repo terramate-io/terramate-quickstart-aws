@@ -41,6 +41,12 @@ resource "kubernetes_deployment" "app2" {
       }
     }
   }
+
+  timeouts {
+    create = "3m"
+    delete = "3m"
+    update = "3m"
+  }
 }
 
 resource "kubernetes_service" "app2" {
@@ -58,6 +64,10 @@ resource "kubernetes_service" "app2" {
     selector = {
       app = local.app_name
     }
+  }
+
+  timeouts {
+    create = "3m"
   }
 }
 
