@@ -1,5 +1,5 @@
 locals {
-  app_name = "app2-${global.terraform.env}"
+  app_name = "${terramate.stack.path.basename}-${global.terraform.env}"
 }
 
 resource "kubernetes_deployment" "app2" {
