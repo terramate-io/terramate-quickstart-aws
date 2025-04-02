@@ -52,14 +52,11 @@ resource "kubernetes_service" "app2" {
     selector = {
       app = local.app_name
     }
-    type = "NodePort"
+    type = "LoadBalancer"
     port {
       port        = 80
       protocol    = "TCP"
       target_port = 8080
     }
   }
-}
-output "app_url" {
-  value = "http://${kubernetes_service.app2.status[0].load_balancer[0].ingress[0].hostname}"
 }
