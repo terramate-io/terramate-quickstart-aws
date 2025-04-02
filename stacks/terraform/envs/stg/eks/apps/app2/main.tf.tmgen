@@ -49,7 +49,7 @@ resource "kubernetes_service" "app2" {
     namespace = global.eks.namespace
   }
   spec {
-    type = "LoadBalancer"
+    type = "NodePort"
     port {
       port        = 80
       protocol    = "TCP"

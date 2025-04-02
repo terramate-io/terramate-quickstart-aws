@@ -52,7 +52,7 @@ resource "kubernetes_service" "app2" {
     selector = {
       app = local.app_name
     }
-    type = "LoadBalancer"
+    type = "NodePort"
     port {
       port        = 80
       protocol    = "TCP"
