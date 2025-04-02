@@ -11,14 +11,14 @@ script "safe-guard" {
   }
 }
 
-script "promote" {
-  name        = "Promote script warning"
-  description = "Print warning when running the promote script outside of the staging stacks"
+# script "promote" {
+#   name        = "Promote script warning"
+#   description = "Print warning when running the promote script outside of the staging stacks"
 
-  job {
-    command = ["echo", <<-EOF
-        [WARNING] The `Promote` script can only be executed in the staging stacks under `stacks/terraform/envs/stg`.
-      EOF
-    ]
-  }
-}
+#   job {
+#     command = ["echo", <<-EOF
+#         [WARNING] The `Promote` script can only be executed in the staging stacks under `stacks/terraform/envs/stg`.
+#       EOF
+#     ]
+#   }
+# }
