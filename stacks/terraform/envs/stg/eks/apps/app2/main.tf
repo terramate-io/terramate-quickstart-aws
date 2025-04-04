@@ -1,7 +1,7 @@
 // TERRAMATE: GENERATED AUTOMATICALLY DO NOT EDIT
 
 locals {
-  app_name = "app2-stg"
+  app_name = "app2-demo-stg"
 }
 resource "kubernetes_deployment" "app2" {
   metadata {
