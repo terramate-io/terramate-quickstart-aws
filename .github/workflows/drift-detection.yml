@@ -94,8 +94,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
+      - name: Check for auto reconcile
+        id: find-drifted
+        run: |
+          terramate list \
+            --status=drifted \
+            --tags reconcile
+
       - name: Run drift reconciliation
         id: drift-reconcile
+        if: steps.find-drifted.outputs.stdout
         run: |
           terramate script run \
             -C stacks/terraform/envs/${{ matrix.env }} \
