@@ -38,7 +38,9 @@ jobs:
       ### Install tooling
 
       - name: Install Terramate
-        uses: terramate-io/terramate-action@v2
+        uses: terramate-io/terramate-action@v3
+        with:
+          version: "0.14.0"
 
       - name: Install asdf
         uses: asdf-vm/actions/setup@v3
