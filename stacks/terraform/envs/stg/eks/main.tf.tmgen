@@ -5,7 +5,7 @@ module "eks" {
   cluster_name    = global.eks.cluster_name
   cluster_version = global.eks.cluster_version
 
-  cluster_endpoint_public_access = true
+  cluster_endpoint_public_access = false
 
   vpc_id     = local.vpc_id
   subnet_ids = local.subnet_ids
