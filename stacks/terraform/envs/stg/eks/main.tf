@@ -1,21 +1,21 @@
 // TERRAMATE: GENERATED AUTOMATICALLY DO NOT EDIT
 
 module "eks" {
-  cluster_compute_config = {
+  compute_config = {
     enabled = true
     node_pools = [
       "general-purpose",
     ]
   }
-  cluster_endpoint_public_access           = true
-  cluster_name                             = "cluster-stg"
-  cluster_version                          = "1.32"
   enable_cluster_creator_admin_permissions = true
+  endpoint_public_access                   = true
+  kubernetes_version                       = "1.32"
+  name                                     = "cluster-stg"
   source                                   = "terraform-aws-modules/eks/aws"
   subnet_ids                               = local.subnet_ids
   tags = {
     Environment = "stg"
   }
-  version = "20.35.0"
+  version = "21.15.1"
   vpc_id  = local.vpc_id
 }

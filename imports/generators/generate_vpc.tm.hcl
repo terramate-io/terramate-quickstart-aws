@@ -1,0 +1,24 @@
+generate_hcl "main.tf" {
+  stack_filter {
+    project_paths = ["**/stacks/terraform/envs/*/vpc"]
+  }
+
+  content {
+    module "vpc" {
+      source  = "terraform-aws-modules/vpc/aws"
+      version = "5.19.0"
+
+      name               = global.vpc.vpc_name
+      cidr               = global.vpc.cidr
+      azs                = global.vpc.azs
+      private_subnets    = global.vpc.private_subnets
+      public_subnets     = global.vpc.public_subnets
+      enable_nat_gateway = true
+
+      tags = {
+        Name        = global.vpc.vpc_name
+        Environment = global.terraform.env
+      }
+    }
+  }
+}

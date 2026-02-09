@@ -1,5 +1,5 @@
 globals "terraform" {
-  version = "1.11.0"
+  version = "1.14.4"
 }
 
 globals "terraform" "backend" {
@@ -17,7 +17,7 @@ globals "aws" "oidc" {
 globals "terraform" "providers" "aws" {
   enabled = true
   source  = "hashicorp/aws"
-  version = "~> 5.89"
+  version = "~> 6.0"
   config = {
     region = "us-east-1"
   }
@@ -26,5 +26,5 @@ globals "terraform" "providers" "aws" {
 globals "terraform" "providers" "kubernetes" {
   enabled = tm_contains(terramate.stack.tags, "kubernetes")
   source  = "hashicorp/kubernetes"
-  version = "~> 2.36.0"
+  version = "~> 3.0"
 }

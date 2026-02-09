@@ -1,6 +1,5 @@
 terramate {
   required_version = ">= 0.12.0"
-  # required_version_allow_prereleases = true
   config {
 
     # Optionally disable safe guards

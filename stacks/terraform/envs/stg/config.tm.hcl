@@ -15,4 +15,7 @@ globals "eks" {
   cluster_name    = "cluster-${global.terraform.env}"
   cluster_version = "1.32"
   namespace       = "app-${global.terraform.env}"
+  # Set true so Terraform (e.g. from laptop/CI) can reach the API when applying apps/namespace stacks.
+  # Restrict via endpoint_public_access_cidrs in the EKS module if needed.
+  cluster_endpoint_public_access = true
 }

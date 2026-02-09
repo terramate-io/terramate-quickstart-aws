@@ -1,4 +1,4 @@
-terraform 1.11.0
-terramate 0.14.0
+terraform 1.14.4
+terramate 0.15.5
 pre-commit 3.6.2
-opentofu 1.9.0
+opentofu 1.11.4
