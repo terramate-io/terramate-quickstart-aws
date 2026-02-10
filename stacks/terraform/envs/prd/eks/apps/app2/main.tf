@@ -3,7 +3,7 @@
 locals {
   app_name = "app2-prd"
 }
-resource "kubernetes_deployment" "app2" {
+resource "kubernetes_deployment" "app" {
   metadata {
     name      = local.app_name
     namespace = "app-prd"
@@ -48,7 +48,8 @@ resource "kubernetes_deployment" "app2" {
     update = "3m"
   }
 }
-resource "kubernetes_service" "app2" {
+resource "kubernetes_service" "app" {
+  wait_for_load_balancer = false
   metadata {
     name      = local.app_name
     namespace = "app-prd"
@@ -65,9 +66,9 @@ resource "kubernetes_service" "app2" {
     }
   }
   timeouts {
-    create = "3m"
+    create = "2m"
   }
 }
 output "app_url" {
-  value = "http://${kubernetes_service.app2.status[0].load_balancer[0].ingress[0].hostname}"
+  value = try("http://${kubernetes_service.app.status[0].load_balancer[0].ingress[0].hostname}", "(load balancer pending)")
 }

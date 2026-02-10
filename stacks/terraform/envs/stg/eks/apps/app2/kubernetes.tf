@@ -1,9 +1,17 @@
 // TERRAMATE: GENERATED AUTOMATICALLY DO NOT EDIT
 
+resource "null_resource" "initial_trigger" {
+}
 data "aws_eks_cluster" "cluster" {
+  depends_on = [
+    null_resource.initial_trigger,
+  ]
   name = "cluster-stg"
 }
 data "aws_eks_cluster_auth" "cluster_auth" {
+  depends_on = [
+    null_resource.initial_trigger,
+  ]
   name = "cluster-stg"
 }
 provider "kubernetes" {

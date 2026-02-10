@@ -23,17 +23,14 @@
 
 ## Introduction
 
-This template repository provides a pre-configured Terramate project to get started with **Terramate** and **Terraform** on **AWS**
-using best practices. It also comes with pre-configured GitOps workflows that run natively in GitHub Actions so that you
-can automate your Terraform in Pull Requests without requiring any additional tooling or infrastructure using the
-Terramate orchestration and change detection.
+This template provides a pre-configured **Terramate** project for **Terraform** (or OpenTofu) on **AWS** using best practices. It includes GitOps workflows in GitHub Actions, DRY code generation for stacks, and support for multiple environments. Use it to orchestrate Terraform, clone or create stacks, and automate plans and applies in Pull Requests.
 
 ### Features
 
 - **GitOps for Terraform with GitHub Actions**: Pre-configured GitHub Action GitOps workflows using merge-and-apply strategy with drift detection and reconciliation.
 - **Recommended Project Structure**: Best practice project structure with environment-based organization (stg, prd).
 - **Change Preview in Pull Requests**: Preview and approval of plans in Pull Requests to review and approve changes before deploying.
-- **DRY Terraform Stacks**: Generate Terraform provider and backend configuration in stacks.
+- **DRY Terraform Stacks**: Generate Terraform provider and backend configuration in stacks via mixins and generators.
 - **OpenID Connect (OIDC)**: Allows GitHub Actions workflows to access AWS resources without storing long-lived GitHub secrets.
 - **Terraform S3 Remote State Backend**: Terraform Remote State Storage and State Locking with AWS S3 and DynamoDB.
 - **Terramate Cloud Integration**: Pushes data to Terramate Cloud for observability, asset management, drift management, and Slack notifications.
@@ -58,213 +55,345 @@ This template creates a complete AWS infrastructure with the following component
 
 3. **Sample Applications**
    - Two sample web applications deployed in the EKS cluster
-   - Applications are accessible via Load Balancer services
+   - Applications are accessible via LoadBalancer services
    - Demonstrates best practices for Kubernetes deployments
 
-The infrastructure is designed to be:
-- Highly available across multiple availability zones
-- Secure with proper network isolation
-- Scalable to meet growing demands
-- Easy to maintain with clear separation of concerns
+The infrastructure is designed to be highly available across multiple availability zones, secure with proper network isolation, and scalable with clear separation of concerns.
 
-## How do you use this repository?
+---
 
-### 1: Create a new repository from this template
+## Repository Structure
 
-Click the *Use this template* button to create your own repository in a GitHub
-account or organization you manage, and let's get started.
+The project is organized as follows:
 
-### 2: Pre-requisites
-
-Ensure you have the following prerequisites set up by running the commands below:
-
-1. Install asdf: Follow the [official guide](https://asdf-vm.com/guide/getting-started.html).
-
-2. Install required `asdf` plugins for Terramate, Terraform, and OpenTofu:
-  
-    ```bash
-    asdf plugin add terramate && \
-    asdf plugin add terraform && \
-    asdf plugin add opentofu && \
-    asdf plugin add pre-commit && \
-    asdf install
-     ```
-
-3. *(Optional)* If you need to create a Terraform State Bucket and Workload Identity Provider, you need to configure your AWS
-credentials using one of the supported [authentication mechanisms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication-and-configuration).
-(We recommend you use [aws-vault](https://github.com/99designs/aws-vault) for secure authentication.)
-
-4. *(Optional)* Install [pre-commit](https://pre-commit.com/) hooks
-
-We recommend installing the pre-commit hooks in this repository to enable a seamless development flow. The hooks guarantee
-that your Terramate and Terraform code is always up-to-date and well-formatted when committing changes to the repository.
-
-```sh
-pre-commit install
+```
+terramate-quickstart-aws/
+├── config.tm.hcl              # Root: Terraform version, backend, providers, OIDC
+├── imports.tm.hcl             # Imports mixins and generators
+├── terramate.tm.hcl          # Project config: cloud, git, experiments
+├── workflows.tm.hcl          # Root-level Terramate scripts
+├── imports/
+│   ├── mixins/               # Shared code-gen: backend, providers, Kubernetes auth
+│   │   ├── backend.tm.hcl
+│   │   ├── terraform.tm.hcl
+│   │   └── kubernetes.tm.hcl
+│   └── generators/           # Versioned code-gen templates
+│       └── v1/               # Current generator version
+│           ├── generate_vpc.tm.hcl
+│           ├── generate_eks.tm.hcl
+│           ├── generate_apps_namespace.tm.hcl
+│           └── generate_app.tm.hcl
+├── stacks/
+│   ├── terraform/
+│   │   ├── workflows.tm.hcl  # init, preview, deploy, drift scripts
+│   │   └── envs/
+│   │       ├── stg/         # Staging: config.tm.hcl, vpc/, eks/, eks/apps/
+│   │       └── prd/         # Production (same structure)
+│   ├── opentofu/            # OpenTofu example stacks
+│   └── ...
+└── _bootstrap/              # One-time: state bucket, OIDC provider
+    ├── terraform-state-bucket/
+    └── oidc-aws-github/
 ```
 
-### Project Structure
+**Key directories:**
 
-The project is organized into the following main directories:
+- **`config.tm.hcl`** (root) — Global defaults: generator version, Terraform version, S3 backend, AWS/Kubernetes providers, OIDC GitHub repos.
+- **`imports.tm.hcl`** — Declares imports for `imports/mixins/*.tm.hcl` and the active generator version (e.g. `imports/generators/v1/*.tm.hcl`).
+- **`imports/mixins/`** — Generate `backend.tf`, `terraform.tf`, and (for stacks with `kubernetes` tag) `kubernetes.tf` in every stack.
+- **`imports/generators/v1/`** — Versioned code-gen templates for VPC, EKS, namespace, and apps. Each generator uses a `condition` on `global.generators.version` so multiple versions can coexist (see [How Code Generation Works](#how-code-generation-works) and [Upgrading Generator Templates](#upgrading-generator-templates)).
+- **`stacks/terraform/envs/{stg,prd}/`** — Environment-specific stacks. Each env has a `config.tm.hcl` (env name, VPC CIDR, EKS cluster name, etc.) and sub-stacks: `vpc/`, `eks/`, `eks/apps/`, `eks/apps/app1/`, `eks/apps/app2/`.
+- **`stacks/opentofu/`** — Example OpenTofu stacks with their own version and backend key in `stacks/opentofu/config.tm.hcl`.
+- **`_bootstrap/`** — Bootstrap stacks for the S3 state bucket and GitHub OIDC; use local state initially, then migrate to S3.
+- **`workflows.tm.hcl`** (root) and **`stacks/terraform/workflows.tm.hcl`** — Terramate script definitions.
 
-- `stacks/terraform/`: Contains all Terraform stacks
-  - `envs/`: Environment-specific configurations
-    - `stg/`: Staging environment
-      - `config.tm.hcl`: Environment-specific configuration for all sub-stacks
-      - `vpc/`: Network infrastructure stack
-        - `main.tf`: VPC, subnets, and networking components
-      - `eks/`: Kubernetes cluster stack
-        - `main.tf`: EKS cluster and node groups
-        - `apps/`: Application deployments (with namespace definition)
-          - `app1/`: First application stack
-          - `app2/`: Second application stack
-    - `prd/`: Production environment (similar structure to stg)
-  - `workflows.tm.hcl`: Reusable Terramate scripts for common operations
+Stacks are deployed in a fixed order: VPC → EKS cluster → apps namespace → application stacks. EKS stacks use `after = ["tag:vpc"]` so the VPC is applied first.
 
-The stacks are designed to be deployed in a specific order using Terramate's stack ordering capabilities. This allows you to:
-- Deploy infrastructure components (VPC then EKS cluster) first
-- Create namespaces
-- Deploy applications in the correct order
-- All while maintaining a single state file per stack
+```mermaid
+flowchart LR
+  VPC --> EKS --> Namespace --> App1
+  Namespace --> App2
+```
 
-This approach enables you to:
-- Deploy multiple related resources in a single PR
-- Maintain clear dependencies between resources
-- Keep your infrastructure code organized and modular
-- Reduce the number of PRs needed for related changes
+---
 
-### Promoting Changes from Staging to Production
+## How Code Generation Works
 
-After testing changes in the staging environment, you can promote them to production using the `promote` Terramate script. This script is designed to help you safely propagate changes from staging to production.
+This repo keeps stacks **DRY** by generating Terraform files from Terramate config and globals. You define stack metadata and globals; Terramate generates the actual `.tf` (and some `_*.tf`) files.
 
-To use the promote script:
+**Two mechanisms:**
 
-1. Navigate to the staging environment directory:
+1. **Generators** (`imports/generators/v1/*.tm.hcl`) — Use `generate_hcl` with `stack_filter.project_paths` to emit specific files only into stacks whose path matches. Each generator also has a `condition = global.generators.version == "v1"` so that multiple generator versions can coexist (see [Upgrading Generator Templates](#upgrading-generator-templates)). The current generators are:
+   - **`generate_vpc.tm.hcl`** — Targets `**/envs/*/vpc`, generates `main.tf` (VPC module) from `global.vpc.*`.
+   - **`generate_eks.tm.hcl`** — Targets `**/envs/*/eks`, generates `main.tf` and `data.tf` from `global.eks.*`.
+   - **`generate_apps_namespace.tm.hcl`** — Targets `**/envs/*/eks/apps`, generates `namespace.tf`.
+   - **`generate_app.tm.hcl`** — Targets `**/envs/*/eks/apps/*`, generates `main.tf` (Deployment + LoadBalancer Service) from `global.app.*` (e.g. `image`, `container_name`, `container_port`).
+
+2. **Mixins** (`imports/mixins/*.tm.hcl`) — Generate shared plumbing in (almost) all stacks: `backend.tm.hcl` → `backend.tf`, `terraform.tm.hcl` → `terraform.tf`, and `kubernetes.tm.hcl` → `kubernetes.tf` only for stacks with the `kubernetes` tag.
+
+**Workflow:**
+
+- Run **`terramate generate`** to (re)generate all such files. After changing `config.tm.hcl`, stack paths, or generator/mixin logic, run it again.
+- **Do not edit generated files by hand** — they are overwritten by `terramate generate`. Edit only `stack.tm.hcl`, `config.tm.hcl`, and the generator/mixin sources.
+
+Example: adding a new app stack under `stacks/terraform/envs/stg/eks/apps/app3/` with a `config.tm.hcl` that sets `globals "app" { image = "..."; container_name = "..."; container_port = 8080; }` will, after `terramate generate`, get `main.tf` from `generate_app.tm.hcl` and `backend.tf` / `terraform.tf` / `kubernetes.tf` from the mixins (because of the `kubernetes` tag).
+
+---
+
+## Getting Started
+
+### 1. Create a repository from this template
+
+Click **Use this template** on GitHub to create your own repository, then clone it.
+
+### 2. Prerequisites
+
+1. **Install [asdf](https://asdf-vm.com/guide/getting-started.html).**
+
+2. **Install plugins and tools** (versions are in `.tool-versions`):
+
    ```bash
-   cd stacks/terraform/envs/stg
+   asdf plugin add terramate && \
+   asdf plugin add terraform && \
+   asdf plugin add opentofu && \
+   asdf plugin add pre-commit && \
+   asdf install
    ```
 
-2. Run the promote script:
+3. **AWS credentials** (for bootstrapping and local runs): Use one of the [AWS provider authentication methods](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication-and-configuration). We recommend [aws-vault](https://github.com/99designs/aws-vault).
+
+4. **Pre-commit (optional but recommended):**
+
    ```bash
-   terramate script run promote
+   pre-commit install
    ```
 
-> **Note**: The promote script is only available when executed from within the staging environment directory. If you try to run it from any other location, it will print a warning message and exit.
+   Hooks keep Terramate and Terraform formatting and generation in sync when you commit.
 
-The promote script will:
-- Compare the changes between staging and production and sync any differences (including deleting files)
-- Run `terramate generate` to make sure any config differences are applied correctly
+### 3. Configure Terraform State Bucket and OIDC (bootstrap)
 
-### Configure Terraform State Bucket and Workload Identity Provider
+1. **Root config** — In the repo root, edit **`config.tm.hcl`**:
+   - Set your S3 state bucket name and region under `globals "terraform" "backend"`.
+   - Set your GitHub repo(s) under `globals "aws" "oidc" "github_repositories"`.
 
-This repository comes with a pre-configured Terraform S3 State Bucket, DynamoDB Lock Table and Workload Identity Provider to enable keyless authentication from GitHub Actions to AWS.
+2. **Generate and deploy bootstrap stacks:**
 
-#### Update Terramate Configurations
+   ```bash
+   terramate generate
+   terramate run -C _bootstrap terraform init
+   terramate run -C _bootstrap terraform apply
+   ```
 
-- Navigate to the `config.tm.hcl` file in your project's root directory.
-- Replace the default Terraform State Bucket name with a name of your choice.
-```bash
-globals "terraform" "backend" {
-  bucket = "any-name-you-want"
-  region = "us-east-1"
-}
-```
+3. **Migrate bootstrap state to S3:** Remove `tags = ["no-backend"]` from the `stack.tm.hcl` in `_bootstrap/oidc-aws-github` and `_bootstrap/terraform-state-bucket`, then:
 
-- Update the GitHub repository name for the workload identity provider with your repository (`<githubuserororganization/repository-name>`).
-```bash
-globals "aws" "oidc" {
-  github_repositories = [
-    "your-github-username-or-organization/repository-name",
-  ]
-}
-```
+   ```bash
+   terramate generate
+   terramate run -C _bootstrap terraform init
+   ```
 
-#### Generate Terraform Files from Terramate Configurations
+   Terraform will migrate existing state into the new backend.
 
-Generate Terraform files using Terramate:
-```bash
-terramate generate
-```
-The `terramate generate` command generates files/code in stacks and helps to keep your stacks [DRY](https://terramate.io/docs/cli/code-generation/#introduction). In the `_bootstrap/terraform-state-bucket` directory, the `config.tm.hcl` file includes a `generate_hcl` block which specifies the HCL code that will be generated by the generate command.
-Because we run the command without specifying the [context](https://terramate.io/docs/cli/code-generation/#generation-context), the default `stack` context is used and generates code relative to the stack where the config file is defined(`terraform-state-bucket` stack in this case). The generated code can be located in the `_main.tf` file within the same directory.
+### 4. Terramate Cloud (optional)
 
-####  Provision Infrastructure on AWS
+1. Go to [Terramate Cloud](https://app.terramate.io), sign up or log in, and create an organization.
+2. Set `terramate.config.cloud` in **`terramate.tm.hcl`** to your organization (and region if needed).
+3. Optionally configure Slack under Integrations for notifications.
 
-To deploy the generated resources to AWS, use the following commands:
+---
+
+## Day-to-Day Developer Workflows
+
+### Cloning an environment with `terramate clone`
+
+To create a new environment (e.g. `dev`) by copying an existing one (e.g. `stg`):
 
 ```bash
-terramate run -C _bootstrap terraform init
-terramate run -C _bootstrap terraform apply
+terramate clone stacks/terraform/envs/stg stacks/terraform/envs/dev
 ```
 
-#### Migrate State to S3 Bucket
+**What this does:** Duplicates the stack tree under `stg` into `dev` and assigns **new stack IDs** to the cloned stacks (so they are independent stacks with their own state).
 
-Now that we have the Terraform State Bucket deployed, we want to move the state of the newly deployed bucket and workload
-identity provider into the bucket.
+**Next steps:**
 
-1. Remove `tags = ["no-backend"]` from `stack.tm.hcl` files of the `_bootstrap/oidc-aws-github` and
-`/bootstrap/terraform-state-bucket` directories.
+1. **Adjust environment config** — Edit `stacks/terraform/envs/dev/config.tm.hcl`:
+   - Set `globals "terraform" { env = "dev" }`.
+   - Change VPC name, CIDR, subnets, EKS cluster name, namespace, etc. so they don’t conflict with stg/prd.
 
-2. Generate Terraform configuration files:
+2. **Regenerate code:**
+
+   ```bash
+   terramate generate
+   ```
+
+3. **Commit and push** (and add the new env to CI if you use a matrix over environments).
+
+You can then run init/preview/deploy against `stacks/terraform/envs/dev` the same way as for `stg` or `prd`.
+
+### Creating a new application stack
+
+To add a new app (e.g. `app3`) in staging:
+
+1. **Create the stack** (and give it a name, description, and the `kubernetes` tag so it gets the Kubernetes provider and app generator):
+
+   ```bash
+   terramate create stacks/terraform/envs/stg/eks/apps/app3 \
+     --name "my-new-app-stg" \
+     --description "My new application" \
+     --tags kubernetes
+   ```
+
+2. **Add app configuration** — Create `stacks/terraform/envs/stg/eks/apps/app3/config.tm.hcl`:
+
+   ```hcl
+   globals "app" {
+     image          = "your-registry/your-image:tag"
+     container_name = "my-app"
+     container_port = 8080
+   }
+   ```
+
+   You can also set `replicas`, `resources.requests`, etc. if your generator supports them.
+
+3. **Generate Terraform files:**
+
+   ```bash
+   terramate generate
+   ```
+
+   The generators and mixins will produce `main.tf` (from `generate_app.tm.hcl`), `backend.tf`, `terraform.tf`, and `kubernetes.tf` in the new stack. No need to copy these by hand.
+
+4. **Plan and apply** (locally or via CI) for the changed stacks, e.g.:
+
+   ```bash
+   terramate script run -C stacks/terraform/envs/stg init
+   terramate script run -C stacks/terraform/envs/stg preview
+   terramate script run -C stacks/terraform/envs/stg deploy
+   ```
+
+### Upgrading generator templates
+
+When an underlying Terraform module changes (new version, new required attributes, restructured resources), you may need to update the code generation templates. Generators are **versioned** so you can roll out template changes to one environment at a time.
+
+**How it works:** Each generator block has a `condition = global.generators.version == "v1"` guard. The active version is set via `globals "generators" { version = "v1" }` in the root `config.tm.hcl` and can be **overridden per environment**.
+
+**Step-by-step: rolling out a new generator version to staging first**
+
+1. **Create the new version** -- copy the current version directory:
+
+   ```bash
+   cp -r imports/generators/v1 imports/generators/v2
+   ```
+
+2. **Update the templates** in `imports/generators/v2/` -- change module versions, add/remove attributes, restructure resources as needed. Update the `condition` in each block:
+
+   ```hcl
+   generate_hcl "main.tf" {
+     condition = global.generators.version == "v2"
+     # ... updated template
+   }
+   ```
+
+3. **Import the new version** -- add it to `imports.tm.hcl`:
+
+   ```hcl
+   import { source = "./imports/mixins/*.tm.hcl" }
+   import { source = "./imports/generators/v1/*.tm.hcl" }
+   import { source = "./imports/generators/v2/*.tm.hcl" }
+   ```
+
+   Both versions are imported, but only the one matching each environment's `global.generators.version` generates output.
+
+4. **Switch staging to v2** -- override the global in `stacks/terraform/envs/stg/config.tm.hcl`:
+
+   ```hcl
+   globals "generators" {
+     version = "v2"
+   }
+   ```
+
+5. **Regenerate:**
+
+   ```bash
+   terramate generate
+   ```
+
+   Only staging stacks get the new templates. Production stays on v1. Commit, open a PR, and CI plans only the changed (staging) stacks.
+
+6. **Roll out to production** -- once staging is validated, either update the root default in `config.tm.hcl` to `"v2"` or override it in `stacks/terraform/envs/prd/config.tm.hcl`. Run `terramate generate` again.
+
+7. **Clean up** -- after all environments are on v2, remove the v1 directory, remove its import from `imports.tm.hcl`, and remove the per-env overrides.
+
+### Running Terraform locally
+
+From the repo root:
+
 ```bash
-terramate generate
-```
-This will create a `_backend.tf` file in both stack directories.
+# Initialize all stacks under an environment
+terramate script run -C stacks/terraform/envs/stg init
 
-3. Initialize Terraform for state migration:
+# Preview (plan) changed stacks
+terramate script run -C stacks/terraform/envs/stg preview
+
+# Deploy (plan + apply) changed stacks
+terramate script run -C stacks/terraform/envs/stg deploy
+```
+
+Use `-C stacks/terraform/envs/prd` (or `dev`) for another environment. Scripts are defined in `stacks/terraform/workflows.tm.hcl`.
+
+---
+
+## Available Terramate Scripts
+
+Defined in **`stacks/terraform/workflows.tm.hcl`**. See [Terramate Scripts](https://terramate.io/docs/cli/scripts/).
+
+| Script | Description |
+|--------|-------------|
+| `init` | Terraform init (backend + providers) |
+| `preview` | Terraform validate + plan; syncs preview to Terramate Cloud |
+| `deploy` | Terraform validate + plan + apply; syncs deployment to Terramate Cloud |
+| `drift detect` | Plan for drift and sync status to Terramate Cloud |
+| `drift reconcile` | Apply `drift.tfplan` to reconcile drift |
+| `terraform render` | Show Terraform plan output (e.g. for PR comments) |
+
+Run with:
+
 ```bash
-terramate run -C _bootstrap terraform init
+terramate script run -C <path> <script_name>
+# e.g. terramate script run -C stacks/terraform/envs/stg deploy
 ```
-This command will move the state of deployed stacks to the S3 bucket.
 
-### Create Terramate Cloud Account
+---
 
-#### Create a new Organization
+## GitHub Actions Workflows
 
-1. Visit [Terramate Cloud](https://app.terramate.io)
-2. Sign up for a new account or log in
-3. Create a new organization
-4. Follow the setup wizard to configure your organization
+Workflows live in **`.github/workflows/`**. They use a matrix over environments (e.g. stg, prd) and AWS OIDC for authentication.
 
-#### Configure Slack Notifications
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| **Preview** (`preview.yml`) | Pull requests to main | Format checks, `terramate generate`, init + plan on changed stacks; syncs preview to Terramate Cloud |
+| **Deploy** (`deploy.yml`) | Push to main | Init + deploy (plan + apply) for changed stacks; runs drift detect after apply |
+| **Drift Detection** (`drift-detection.yml`) | Manual / schedule | Init all stacks, drift detect, optionally reconcile stacks with `reconcile` tag |
 
-1. In Terramate Cloud, navigate to your organization settings
-2. Go to the "Integrations" section
-3. Add a new Slack integration
+---
 
-### Available Terramate Scripts
+## Terramate Cloud Integration
 
-The project includes several pre-configured Terramate scripts in `stacks/terraform/workflows.tm.hcl` (see [Terramate Scripts Documentation](https://terramate.io/docs/cli/scripts/)):
+- **Preview** and **Deploy** scripts sync plan/deployment data to Terramate Cloud when `terramate.config.cloud` is set in `terramate.tm.hcl`.
+- Use Terramate Cloud for stack overview, drift status, and (optional) Slack notifications. Configure the organization and Slack under your Cloud account settings.
 
-- `init`: Initialize Terraform
-- `preview`: Create a preview of changes and sync to Terramate Cloud
-- `deploy`: Run a full deployment cycle and sync results to Terramate Cloud
-- `drift detect`: Check for infrastructure drift and sync results to Terramate Cloud
-- `drift reconcile`: Optionally reconcile detected drift
-- `terraform render`: Render Terraform plan output
+---
 
-### GitHub Actions Workflows
+## Key Files Reference
 
-The repository includes three main GitHub Actions workflows. All workflows support multiple environments (stg, prd) using a workflow matrix.
-
-1. **Preview Workflow** (`preview.yml`):
-   - Runs on pull requests
-   - Performs Terraform validation and planning
-   - Syncs preview results to Terramate Cloud
-
-2. **Deploy Workflow** (`deploy.yml`):
-   - Runs on merges to the main branch
-   - Applies approved changes
-   - Syncs deployment results to Terramate Cloud
-
-3. **Drift Detection Workflow** (`drift-detection.yml`):
-   - Runs on a schedule
-   - Detects infrastructure drift
-   - Creates pull requests for drift reconciliation
-   - Sends notifications via Slack
-
-### To Do
-
-- Policies with OPA and/or Sentinel
-- Implement checkov, trivy, terrascan
-- Implement infracost
+| File | Purpose |
+|------|---------|
+| `config.tm.hcl` (root) | Generator version, Terraform version, backend, providers, OIDC repos |
+| `imports.tm.hcl` | Import declarations for mixins and active generator version(s) |
+| `terramate.tm.hcl` | Project config: required_version, cloud, git, run env, experiments |
+| `workflows.tm.hcl` (root) | Root-level Terramate scripts |
+| `stacks/terraform/workflows.tm.hcl` | init, preview, deploy, drift, terraform render scripts |
+| `stacks/terraform/envs/stg/config.tm.hcl` | Staging env: terraform.env, vpc, eks, namespace globals |
+| `stacks/terraform/envs/prd/config.tm.hcl` | Production env config |
+| `stacks/opentofu/config.tm.hcl` | OpenTofu version and backend key overrides |
+| `imports/generators/v1/*.tm.hcl` | Versioned code generators (VPC, EKS, namespace, app) |
+| `imports/mixins/*.tm.hcl` | Backend, Terraform block, Kubernetes provider mixins |
