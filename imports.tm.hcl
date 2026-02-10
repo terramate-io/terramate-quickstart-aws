@@ -3,5 +3,5 @@ import {
 }
 
 import {
-  source = "./imports/generators/*.tm.hcl"
+  source = "./imports/generators/v1/*.tm.hcl"
 }

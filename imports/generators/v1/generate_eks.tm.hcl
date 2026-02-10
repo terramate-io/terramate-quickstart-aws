@@ -1,4 +1,6 @@
 generate_hcl "main.tf" {
+  condition = global.generators.version == "v1"
+
   stack_filter {
     project_paths = ["**/stacks/terraform/envs/*/eks"]
   }
@@ -31,6 +33,8 @@ generate_hcl "main.tf" {
 }
 
 generate_hcl "data.tf" {
+  condition = global.generators.version == "v1"
+
   stack_filter {
     project_paths = ["**/stacks/terraform/envs/*/eks"]
   }

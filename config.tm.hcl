@@ -1,3 +1,7 @@
+globals "generators" {
+  version = "v1"
+}
+
 globals "terraform" {
   version = "1.14.4"
 }

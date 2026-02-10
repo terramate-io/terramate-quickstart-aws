@@ -1,4 +1,6 @@
 generate_hcl "namespace.tf" {
+  condition = global.generators.version == "v1"
+
   stack_filter {
     project_paths = ["**/stacks/terraform/envs/*/eks/apps"]
   }

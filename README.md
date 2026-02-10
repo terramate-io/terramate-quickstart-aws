@@ -77,11 +77,12 @@ terramate-quickstart-aws/
 │   │   ├── backend.tm.hcl
 │   │   ├── terraform.tm.hcl
 │   │   └── kubernetes.tm.hcl
-│   └── generators/           # Path-filtered code-gen: VPC, EKS, namespace, apps
-│       ├── generate_vpc.tm.hcl
-│       ├── generate_eks.tm.hcl
-│       ├── generate_apps_namespace.tm.hcl
-│       └── generate_app.tm.hcl
+│   └── generators/           # Versioned code-gen templates
+│       └── v1/               # Current generator version
+│           ├── generate_vpc.tm.hcl
+│           ├── generate_eks.tm.hcl
+│           ├── generate_apps_namespace.tm.hcl
+│           └── generate_app.tm.hcl
 ├── stacks/
 │   ├── terraform/
 │   │   ├── workflows.tm.hcl  # init, preview, deploy, drift scripts
@@ -97,14 +98,14 @@ terramate-quickstart-aws/
 
 **Key directories:**
 
-- **`config.tm.hcl`** (root) — Global defaults: Terraform version, S3 backend, AWS/Kubernetes providers, OIDC GitHub repos.
-- **`imports.tm.hcl`** — Declares imports for `imports/mixins/*.tm.hcl` and `imports/generators/*.tm.hcl`.
+- **`config.tm.hcl`** (root) — Global defaults: generator version, Terraform version, S3 backend, AWS/Kubernetes providers, OIDC GitHub repos.
+- **`imports.tm.hcl`** — Declares imports for `imports/mixins/*.tm.hcl` and the active generator version (e.g. `imports/generators/v1/*.tm.hcl`).
 - **`imports/mixins/`** — Generate `backend.tf`, `terraform.tf`, and (for stacks with `kubernetes` tag) `kubernetes.tf` in every stack.
-- **`imports/generators/`** — Generate VPC, EKS, namespace, and app Terraform in stacks matching path patterns (see [How Code Generation Works](#how-code-generation-works)).
+- **`imports/generators/v1/`** — Versioned code-gen templates for VPC, EKS, namespace, and apps. Each generator uses a `condition` on `global.generators.version` so multiple versions can coexist (see [How Code Generation Works](#how-code-generation-works) and [Upgrading Generator Templates](#upgrading-generator-templates)).
 - **`stacks/terraform/envs/{stg,prd}/`** — Environment-specific stacks. Each env has a `config.tm.hcl` (env name, VPC CIDR, EKS cluster name, etc.) and sub-stacks: `vpc/`, `eks/`, `eks/apps/`, `eks/apps/app1/`, `eks/apps/app2/`.
 - **`stacks/opentofu/`** — Example OpenTofu stacks with their own version and backend key in `stacks/opentofu/config.tm.hcl`.
 - **`_bootstrap/`** — Bootstrap stacks for the S3 state bucket and GitHub OIDC; use local state initially, then migrate to S3.
-- **`workflows.tm.hcl`** (root) and **`stacks/terraform/workflows.tm.hcl`** — Terramate script definitions. Staging also has **`stacks/terraform/envs/stg/workflows.tm.hcl`** with the `promote` script.
+- **`workflows.tm.hcl`** (root) and **`stacks/terraform/workflows.tm.hcl`** — Terramate script definitions.
 
 Stacks are deployed in a fixed order: VPC → EKS cluster → apps namespace → application stacks. EKS stacks use `after = ["tag:vpc"]` so the VPC is applied first.
 
@@ -122,7 +123,7 @@ This repo keeps stacks **DRY** by generating Terraform files from Terramate conf
 
 **Two mechanisms:**
 
-1. **Generators** (`imports/generators/*.tm.hcl`) — Use `generate_hcl` with `stack_filter.project_paths` to emit specific files only into stacks whose path matches. For example:
+1. **Generators** (`imports/generators/v1/*.tm.hcl`) — Use `generate_hcl` with `stack_filter.project_paths` to emit specific files only into stacks whose path matches. Each generator also has a `condition = global.generators.version == "v1"` so that multiple generator versions can coexist (see [Upgrading Generator Templates](#upgrading-generator-templates)). The current generators are:
    - **`generate_vpc.tm.hcl`** — Targets `**/envs/*/vpc`, generates `main.tf` (VPC module) from `global.vpc.*`.
    - **`generate_eks.tm.hcl`** — Targets `**/envs/*/eks`, generates `main.tf` and `data.tf` from `global.eks.*`.
    - **`generate_apps_namespace.tm.hcl`** — Targets `**/envs/*/eks/apps`, generates `namespace.tf`.
@@ -268,26 +269,59 @@ To add a new app (e.g. `app3`) in staging:
    terramate script run -C stacks/terraform/envs/stg preview
    terramate script run -C stacks/terraform/envs/stg deploy
    ```
-**
-### Promoting staging to production
 
-After validating changes in staging, sync stack layout and generated code to production using the **promote** script defined in `stacks/terraform/envs/stg/workflows.tm.hcl`:
+### Upgrading generator templates
 
-1. **From the staging env directory:**
+When an underlying Terraform module changes (new version, new required attributes, restructured resources), you may need to update the code generation templates. Generators are **versioned** so you can roll out template changes to one environment at a time.
+
+**How it works:** Each generator block has a `condition = global.generators.version == "v1"` guard. The active version is set via `globals "generators" { version = "v1" }` in the root `config.tm.hcl` and can be **overridden per environment**.
+
+**Step-by-step: rolling out a new generator version to staging first**
+
+1. **Create the new version** -- copy the current version directory:
 
    ```bash
-   cd stacks/terraform/envs/stg
-   terramate script run promote
+   cp -r imports/generators/v1 imports/generators/v2
    ```
 
-   The script runs in each stack under `stg` and, for the corresponding path under `prd`:
-   - Creates the prd stack with `terramate create` if it doesn’t exist.
-   - Rsyncs files from stg to prd **excluding** `stack.tm.hcl` and `config.tm.hcl` (so prd keeps its own IDs and config).
-   - Runs `terramate generate` under the prd path so generated `.tf` files match prd’s config.
+2. **Update the templates** in `imports/generators/v2/` -- change module versions, add/remove attributes, restructure resources as needed. Update the `condition` in each block:
 
-2. **Review and commit** the resulting changes under `stacks/terraform/envs/prd`, then merge. CI will apply prd when you deploy.
+   ```hcl
+   generate_hcl "main.tf" {
+     condition = global.generators.version == "v2"
+     # ... updated template
+   }
+   ```
 
-> **Note:** The promote script is intended to be run from within `stacks/terraform/envs/stg`. Run it from each stack context (or as designed in the script) so each stg stack promotes to its prd counterpart.
+3. **Import the new version** -- add it to `imports.tm.hcl`:
+
+   ```hcl
+   import { source = "./imports/mixins/*.tm.hcl" }
+   import { source = "./imports/generators/v1/*.tm.hcl" }
+   import { source = "./imports/generators/v2/*.tm.hcl" }
+   ```
+
+   Both versions are imported, but only the one matching each environment's `global.generators.version` generates output.
+
+4. **Switch staging to v2** -- override the global in `stacks/terraform/envs/stg/config.tm.hcl`:
+
+   ```hcl
+   globals "generators" {
+     version = "v2"
+   }
+   ```
+
+5. **Regenerate:**
+
+   ```bash
+   terramate generate
+   ```
+
+   Only staging stacks get the new templates. Production stays on v1. Commit, open a PR, and CI plans only the changed (staging) stacks.
+
+6. **Roll out to production** -- once staging is validated, either update the root default in `config.tm.hcl` to `"v2"` or override it in `stacks/terraform/envs/prd/config.tm.hcl`. Run `terramate generate` again.
+
+7. **Clean up** -- after all environments are on v2, remove the v1 directory, remove its import from `imports.tm.hcl`, and remove the per-env overrides.
 
 ### Running Terraform locally
 
@@ -310,7 +344,7 @@ Use `-C stacks/terraform/envs/prd` (or `dev`) for another environment. Scripts a
 
 ## Available Terramate Scripts
 
-Defined in **`stacks/terraform/workflows.tm.hcl`** (and **`stacks/terraform/envs/stg/workflows.tm.hcl`** for `promote`). See [Terramate Scripts](https://terramate.io/docs/cli/scripts/).
+Defined in **`stacks/terraform/workflows.tm.hcl`**. See [Terramate Scripts](https://terramate.io/docs/cli/scripts/).
 
 | Script | Description |
 |--------|-------------|
@@ -320,7 +354,6 @@ Defined in **`stacks/terraform/workflows.tm.hcl`** (and **`stacks/terraform/envs
 | `drift detect` | Plan for drift and sync status to Terramate Cloud |
 | `drift reconcile` | Apply `drift.tfplan` to reconcile drift |
 | `terraform render` | Show Terraform plan output (e.g. for PR comments) |
-| `promote` | (Staging only) Sync stg stacks to prd and run generate |
 
 Run with:
 
@@ -354,14 +387,13 @@ Workflows live in **`.github/workflows/`**. They use a matrix over environments 
 
 | File | Purpose |
 |------|---------|
-| `config.tm.hcl` (root) | Global Terraform version, backend, providers, OIDC repos |
-| `imports.tm.hcl` | Import declarations for mixins and generators |
+| `config.tm.hcl` (root) | Generator version, Terraform version, backend, providers, OIDC repos |
+| `imports.tm.hcl` | Import declarations for mixins and active generator version(s) |
 | `terramate.tm.hcl` | Project config: required_version, cloud, git, run env, experiments |
 | `workflows.tm.hcl` (root) | Root-level Terramate scripts |
 | `stacks/terraform/workflows.tm.hcl` | init, preview, deploy, drift, terraform render scripts |
 | `stacks/terraform/envs/stg/config.tm.hcl` | Staging env: terraform.env, vpc, eks, namespace globals |
-| `stacks/terraform/envs/stg/workflows.tm.hcl` | Promote script (stg → prd) |
 | `stacks/terraform/envs/prd/config.tm.hcl` | Production env config |
 | `stacks/opentofu/config.tm.hcl` | OpenTofu version and backend key overrides |
-| `imports/generators/*.tm.hcl` | Code generators (VPC, EKS, namespace, app) |
+| `imports/generators/v1/*.tm.hcl` | Versioned code generators (VPC, EKS, namespace, app) |
 | `imports/mixins/*.tm.hcl` | Backend, Terraform block, Kubernetes provider mixins |
